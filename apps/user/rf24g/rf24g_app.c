@@ -359,7 +359,7 @@ void rf24_key_handle(void)
                 else if (key_value == _17_key3)
                 {
                     // 速度减
-                    //  SPEED-
+                    // SPEED-
 
                     ls_speed_sub();
                     fc_meteor_speed();
@@ -369,7 +369,7 @@ void rf24_key_handle(void)
                     // 恢复出厂
                     fc_data_init();
                     set_fc_effect();
-                    // MODE
+                    // demo
                 }
                 else if (key_value == _17_key5)
                 {
@@ -496,7 +496,7 @@ void rf24_key_handle(void)
                 else if (key_value == _17_key17)
                 {
                     // G
-                    //    时间间隔最长
+                    // 时间间隔最长
 
                     set_meteor_p(20);
                     fc_meteor_p();

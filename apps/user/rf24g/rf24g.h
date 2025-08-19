@@ -40,8 +40,8 @@
 
 
 
-
-#define _17_key1 0x01
+// 17键按键遥控器对应的键值
+#define _17_key1 0x01   
 #define _17_key2 0x05
 #define _17_key3 0x07
 #define _17_key4 0x08
@@ -60,7 +60,7 @@
 #define _17_key17 0x15        
 
 
-#pragma pack (1)
+#pragma pack (1) // 控制结构体成员的内存对齐方式
 typedef struct
 {
     u8 header1;

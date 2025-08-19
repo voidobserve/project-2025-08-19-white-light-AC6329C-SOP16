@@ -94,7 +94,8 @@ static u8 rf24g_get_key_value(void)
     {
         rf24g_rx_flag = 0;
         rf24_T0 = 0;
-      
+        
+        // 上次的动态码不等于这次收到的动态码，则判定为按键按下
         if(last_dynamic_code != rf24g_ins.dynamic_code)// || last_key_v != rf24g_ins.key_v)
         {
             long_press_cnt = 0;
@@ -104,7 +105,7 @@ static u8 rf24g_get_key_value(void)
             last_dynamic_code = rf24g_ins.dynamic_code;
             return rf24g_ins.key_v;
         }
-        else
+        else // 上次的动态码等于这次收到的动态码，则判定为按键长按
         {
             if(long_press_cnt >= LONG_PRESS_T)
             {

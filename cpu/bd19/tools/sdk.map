@@ -2345,9 +2345,9 @@ LOAD C:\JL\pi32\q32s-lib\libm.a
 LOAD C:\JL\pi32\q32s-lib\libcompiler-rt.a
 OUTPUT(..\..\..\..\cpu\bd19\tools\sdk.elf elf32-q32s)
 
-.debug_str      0x00000000    0x3461b
- .debug_str     0x00000000    0x3461b ..\..\..\..\cpu\bd19\tools\sdk.elf.o
-                              0x37cb6 (size before relaxing)
+.debug_str      0x00000000    0x346c3
+ .debug_str     0x00000000    0x346c3 ..\..\..\..\cpu\bd19\tools\sdk.elf.o
+                              0x37d5e (size before relaxing)
 
 .debug_loc      0x00000000    0x15826
  .debug_loc     0x00000000    0x15826 ..\..\..\..\cpu\bd19\tools\sdk.elf.o
@@ -2357,10 +2357,10 @@ OUTPUT(..\..\..\..\cpu\bd19\tools\sdk.elf elf32-q32s)
  .debug_abbrev  0x00000f53       0x26 ../../../../include_lib/liba/bd19/cpu.a(startup.S.o)
  .debug_abbrev  0x00000f79       0x28 ../../../../include_lib/liba/bd19/system.a(port_asm_mmu.S.o)
 
-.debug_info     0x00000000    0x8d512
- .debug_info    0x00000000    0x8d15a ..\..\..\..\cpu\bd19\tools\sdk.elf.o
- .debug_info    0x0008d15a      0x1e4 ../../../../include_lib/liba/bd19/cpu.a(startup.S.o)
- .debug_info    0x0008d33e      0x1d4 ../../../../include_lib/liba/bd19/system.a(port_asm_mmu.S.o)
+.debug_info     0x00000000    0x8d627
+ .debug_info    0x00000000    0x8d26f ..\..\..\..\cpu\bd19\tools\sdk.elf.o
+ .debug_info    0x0008d26f      0x1e4 ../../../../include_lib/liba/bd19/cpu.a(startup.S.o)
+ .debug_info    0x0008d453      0x1d4 ../../../../include_lib/liba/bd19/system.a(port_asm_mmu.S.o)
 
 .debug_ranges   0x00000000     0x3610
  .debug_ranges  0x00000000     0x35e8 ..\..\..\..\cpu\bd19\tools\sdk.elf.o
@@ -2376,19 +2376,19 @@ OUTPUT(..\..\..\..\cpu\bd19\tools\sdk.elf elf32-q32s)
                 0x00000000    0x1730c ..\..\..\..\cpu\bd19\tools\sdk.elf.o
 
 .debug_pubtypes
-                0x00000000     0xfb74
+                0x00000000     0xfbdd
  .debug_pubtypes
-                0x00000000     0xfb74 ..\..\..\..\cpu\bd19\tools\sdk.elf.o
+                0x00000000     0xfbdd ..\..\..\..\cpu\bd19\tools\sdk.elf.o
 
 .debug_frame    0x00000000     0x6da8
  .debug_frame   0x00000000     0x6da8 ..\..\..\..\cpu\bd19\tools\sdk.elf.o
 
-.debug_line     0x00000000    0x34c81
- .debug_line    0x00000000    0x34a7c ..\..\..\..\cpu\bd19\tools\sdk.elf.o
- .debug_line    0x00034a7c       0xf7 ../../../../include_lib/liba/bd19/cpu.a(startup.S.o)
- .debug_line    0x00034b73       0xb6 ../../../../include_lib/liba/bd19/system.a(port_asm_mmu.S.o)
- .debug_line    0x00034c29       0x2c ../../../../include_lib/liba/bd19/btctrler.a(version.z.o)
- .debug_line    0x00034c55       0x2c ../../../../include_lib/liba/bd19/update.a(version.z.o)
+.debug_line     0x00000000    0x352c5
+ .debug_line    0x00000000    0x350c0 ..\..\..\..\cpu\bd19\tools\sdk.elf.o
+ .debug_line    0x000350c0       0xf7 ../../../../include_lib/liba/bd19/cpu.a(startup.S.o)
+ .debug_line    0x000351b7       0xb6 ../../../../include_lib/liba/bd19/system.a(port_asm_mmu.S.o)
+ .debug_line    0x0003526d       0x2c ../../../../include_lib/liba/bd19/btctrler.a(version.z.o)
+ .debug_line    0x00035299       0x2c ../../../../include_lib/liba/bd19/update.a(version.z.o)
 
 .debug_aranges  0x00000000       0x48
  .debug_aranges

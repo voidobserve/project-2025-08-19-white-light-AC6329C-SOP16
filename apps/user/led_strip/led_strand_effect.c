@@ -291,6 +291,7 @@ extern uint16_t WS2812FX_mode_comet_3(void);
             &WS2812FX_mode_comet_1,                     //效果
             WHITE,                                      //颜色，WS2812FX_setColors设置
             fc_effect.speed,                            //速度
+            // size_type[fc_effect.custom_index-1] | 0);             //选项，这里像素点大小：3 REVERSE决定方向
             size_type[fc_effect.custom_index-1] | 0);             //选项，这里像素点大小：3 REVERSE决定方向
         WS2812FX_start();
     }
