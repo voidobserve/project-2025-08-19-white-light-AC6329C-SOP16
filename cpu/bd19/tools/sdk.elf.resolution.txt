@@ -1695,6 +1695,7 @@ obj/Release/apps/spp_and_le/app_main.o
 -r=obj/Release/apps/spp_and_le/app_main.o,adc_get_value,l
 -r=obj/Release/apps/spp_and_le/app_main.o,memmove,l
 -r=obj/Release/apps/spp_and_le/app_main.o,set_mss,l
+-r=obj/Release/apps/spp_and_le/app_main.o,WS2812FX_trigger,l
 -r=obj/Release/apps/spp_and_le/app_main.o,main_while,pl
 -r=obj/Release/apps/spp_and_le/app_main.o,rf433_handle,l
 -r=obj/Release/apps/spp_and_le/app_main.o,run_tick_per_10ms,l

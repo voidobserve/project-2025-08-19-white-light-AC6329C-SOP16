@@ -2122,6 +2122,7 @@ void sound_handle(void)
                    // printf("\n adc=%d",adc);
                     //printf("\n adc_sum/adc_sum_n=%d",adc_sum/adc_sum_n);
                     music_trigger = 1;
+                    WS2812FX_trigger(); // 让主函数扫描到，立即更新动画，否则看起来声控的灵敏度会差一些
                 }
             }
         }
