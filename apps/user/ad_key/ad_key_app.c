@@ -37,7 +37,7 @@ void ad_key_handle(struct sys_event *event)
                 off_cnt = 0;
                 if(led_state.OpenorCloseflag == OPEN_STATE)
                 {
-                    soft_rurn_off_lights();
+                    soft_turn_off_lights();
                 }
                 else
                 {

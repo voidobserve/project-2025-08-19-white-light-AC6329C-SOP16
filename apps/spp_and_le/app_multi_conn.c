@@ -409,7 +409,7 @@ static void app_start()
     /* app_timer_handle  = sys_timer_add(NULL, app_timer_handler, 500); */
 
 
- led_main(); //应用主程序入口
+    led_main(); //应用主程序入口
 
 #if 0//for test
     led_io_init();

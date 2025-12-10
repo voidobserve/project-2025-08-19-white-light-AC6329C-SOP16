@@ -617,7 +617,17 @@ static bool resolve_adv_report(u8 *adv_address, u8 data_length, u8 *data, s8 rss
         ad_type = *adv_data_pt++;
         i += (lenght + 1);
 
-rf24g_scan(adv_data_pt);
+#if 0
+        // 只打印信号强度高的数据包
+        if (rssi > -50)
+        {
+            printf("===============>");
+            printf_buf(adv_data_pt, lenght - 1);
+            printf("===============^");
+        }
+#endif
+
+        rf24g_scan(adv_data_pt);
 // printf_buf(adv_data_pt, lenght);
 
 

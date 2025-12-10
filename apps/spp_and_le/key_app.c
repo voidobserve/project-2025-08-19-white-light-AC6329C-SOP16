@@ -158,7 +158,7 @@ void ir_timer_handle(void)
             if(led_state.OpenorCloseflag == OPEN_STATE)
             {
                 set_ir_timer(IR_TIMER_0);
-                soft_rurn_off_lights();     //软关灯
+                soft_turn_off_lights();     //软关灯
                 OnOff_Synchro(led_state.OpenorCloseflag);   //同步关机
                 #ifdef MY_DEBUG
                 printf("\r timer ok");

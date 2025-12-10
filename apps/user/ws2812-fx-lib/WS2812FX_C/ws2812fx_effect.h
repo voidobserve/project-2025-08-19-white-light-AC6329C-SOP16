@@ -83,8 +83,11 @@ uint16_t WS2812FX_mode_mutil_twihkle(void);
 uint16_t WS2812FX_mode_multi_forward_same(void);
 uint16_t WS2812FX_mode_multi_back_same(void);
 
+uint16_t fc_double_meteor(void);
+// uint16_t WS2812FX_mode_comet_3(void);
+uint16_t WS2812FX_mode_comet_4(void);
 
-
+u16 meteor_lights_close_effect(void); // 流星灯关机时对应的动画效果，灯光全灭
 
 
 #endif

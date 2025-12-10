@@ -38,7 +38,7 @@ typedef struct
 
 rf24g_pair_t rf24g_pair[PAIR_MAX]; // 需要写flash
 /***********************************************************移植须修改****************************************************************/
-extern void save_user_data_area3(void);
+
 #define PAIR_TIME_OUT 5 * 1000 // 3秒
 static u16 pair_tc = 0;
 
@@ -79,27 +79,27 @@ void read_rf24g_pair_data(void)
 extern void ls_lenght_add(u8 l);
 extern void ls_lenght_sub(u8 l);
 
-static void pair_handle(void)
-{
-    extern void save_rf24g_pair_data(void);
-    u8 op = 0; // 1:配对，2：解码
-    u8 i;
+// static void pair_handle(void)
+// {
+//     extern void save_rf24g_pair_data(void);
+//     u8 op = 0; // 1:配对，2：解码
+//     u8 i;
 
-    // 开机3秒内
-    if (pair_tc < PAIR_TIME_OUT)
-    {
-        // printf("\n pair_tc=%d",pair_tc);
-        pair_tc = PAIR_TIME_OUT; // 避免误触发2次
-        memcpy((u8 *)(&rf24g_pair[0].pair), (u8 *)(&rf24g_ins.pair), 3);
-        rf24g_pair[0].flag = 0xaa;
-        save_rf24g_pair_data();
-        // printf("\n pair");
-        // printf_buf(&rf24g_pair[0].pair, 3);
-        extern void fc_24g_pair_effect(void); // 配对效果
-        fc_24g_pair_effect();
-        // 查找表是否存在
-    }
-}
+//     // 开机3秒内
+//     if (pair_tc < PAIR_TIME_OUT)
+//     {
+//         // printf("\n pair_tc=%d",pair_tc);
+//         pair_tc = PAIR_TIME_OUT; // 避免误触发2次
+//         memcpy((u8 *)(&rf24g_pair[0].pair), (u8 *)(&rf24g_ins.pair), 3);
+//         rf24g_pair[0].flag = 0xaa;
+//         save_rf24g_pair_data();
+//         // printf("\n pair");
+//         // printf_buf(&rf24g_pair[0].pair, 3);
+//         // extern void fc_24g_pair_effect(void); // 配对效果
+//         // fc_24g_pair_effect();
+//         // 查找表是否存在
+//     }
+// }
 
 extern u8 ble_state;
 
@@ -154,12 +154,219 @@ void rf24_key_handle(void)
         if (rf24g_ins.header1 == 0XDC && rf24g_ins.header2 == 0XDC)
         {
 
+            // printf("key event click\n");
+            // printf("key val %u\n", rf24g_ins.key_v);
+
+            if (RF24G_KEY_VAL_R1C3 == key_value)
+            {
+                // 关灯
+                soft_turn_off_lights();
+            }
+            else if (RF24G_KEY_VAL_R1C4 == key_value)
+            {
+                // 开灯
+                soft_turn_on_the_light();
+            }
+
+            if (DEVICE_OFF == get_on_off_state())
+            {
+                // 如果没有开机，直接返回
+                return;
+            }
+
+            switch (key_value)
+            {
+            case RF24G_KEY_VAL_R1C1:
+            {
+                // 速度加
+                printf("speed add\n");
+                ls_speed_plus();
+                fc_meteor_speed(); // 向app反馈速度值
+            }
+            break;
+            // ======================================================================================
+            case RF24G_KEY_VAL_R1C2:
+            {
+                // 速度减
+                printf("speed sub\n");
+                ls_speed_sub();
+                fc_meteor_speed(); // 向app反馈速度值
+            }
+            break;
+                // ======================================================================================
+            case RF24G_KEY_VAL_R3C1:
+            {
+                // 模式加
+                printf("mode add\n");
+                add_meteor_mode();
+            }
+            break;
+            // ======================================================================================
+            case RF24G_KEY_VAL_R3C2:
+            {
+                // 模式减
+                printf("mode sub\n");
+                sub_meteor_mode();
+            }
+            break;
+            // ======================================================================================
+            case RF24G_KEY_VAL_R3C3:
+            {
+                // 亮度加
+                printf("bright add\n");
+                bright_plus();
+            }
+            break;
+            // ======================================================================================
+            case RF24G_KEY_VAL_R3C4:
+            {
+                // 亮度减
+                printf("bright sub\n");
+                bright_sub();
+            }
+            break;
+            // ======================================================================================
+            case RF24G_KEY_VAL_R4C1:
+            {
+                // 独立的流星模式， 索引值 == 1
+                fc_effect.custom_index = 1;
+                set_fc_effect();
+            }
+            break;
+            // ======================================================================================
+            case RF24G_KEY_VAL_R4C2:
+            {
+                // 独立的流星模式， 索引值 == 2
+                fc_effect.custom_index = 2;
+                set_fc_effect();
+            }
+            break;
+            // ======================================================================================
+            case RF24G_KEY_VAL_R4C3:
+            {
+                // 独立的流星模式， 索引值 == 3
+                fc_effect.custom_index = 3;
+                set_fc_effect();
+            }
+            break;
+            // ======================================================================================
+            case RF24G_KEY_VAL_R4C4:
+            {
+                // 独立的流星模式， 索引值 == 4
+                fc_effect.custom_index = 4;
+                set_fc_effect();
+            }
+            break;
+            // ======================================================================================
+            case RF24G_KEY_VAL_R5C1:
+            {
+                // 独立的流星模式， 索引值 == 5
+                fc_effect.custom_index = 5;
+                set_fc_effect();
+            }
+            break;
+            // ======================================================================================
+            case RF24G_KEY_VAL_R5C2:
+            {
+                // 独立的流星模式， 索引值 == 6
+                fc_effect.custom_index = 6;
+                set_fc_effect();
+            }
+            break;
+            // ======================================================================================
+            case RF24G_KEY_VAL_R5C3:
+            {
+                // 独立的流星模式， 索引值 == 7
+                fc_effect.custom_index = 7;
+                set_fc_effect();
+            }
+            break;
+            // ======================================================================================
+            case RF24G_KEY_VAL_R5C4:
+            {
+                // 独立的流星模式， 索引值 == 8
+                fc_effect.custom_index = 8;
+                set_fc_effect();
+            }
+            break;
+            // ======================================================================================
+            case RF24G_KEY_VAL_R6C1:
+            {
+                // 独立的流星模式， 索引值 == 9
+                fc_effect.custom_index = 9;
+                set_fc_effect();
+            }
+            break;
+            // ======================================================================================
+            case RF24G_KEY_VAL_R6C2:
+            {
+                // 独立的流星模式， 索引值 == 10
+                fc_effect.custom_index = 10;
+                set_fc_effect();
+            }
+            break;
+            // ======================================================================================
+            case RF24G_KEY_VAL_R6C3:
+            {
+                // 独立的流星模式， 索引值 == 11
+                fc_effect.custom_index = 11;
+                set_fc_effect();
+            }
+            break;
+            // ======================================================================================
+            case RF24G_KEY_VAL_R6C4:
+            {
+                // 独立的流星模式， 索引值 == 12
+                fc_effect.custom_index = 12;
+                set_fc_effect();
+            }
+            break;
+            // ======================================================================================
+            case RF24G_KEY_VAL_R7C1:
+            {
+                // 独立的流星模式， 索引值 == 13
+                fc_effect.custom_index = 13;
+                set_fc_effect();
+            }
+            break;
+            // ======================================================================================
+            case RF24G_KEY_VAL_R7C2:
+            {
+                // 独立的流星模式， 索引值 == 14
+                fc_effect.custom_index = 14;
+                set_fc_effect();
+            }
+            break;
+            // ======================================================================================
+            case RF24G_KEY_VAL_R7C3:
+            {
+                // 独立的流星模式， 索引值 == 15
+                fc_effect.custom_index = 15;
+                set_fc_effect();
+            }
+            break;
+            // ======================================================================================
+            case RF24G_KEY_VAL_R7C4:
+            {
+                // 独立的流星模式， 索引值 == 16
+                fc_effect.custom_index = 16;
+                set_fc_effect();
+            }
+            // ======================================================================================
+            default:
+            {
+            }
+            break;
+            }
+
+            // 保存数据
+            os_taskq_post("msg_task", 1, MSG_USER_SAVE_INFO);
 #if 0
             
             //软关灯
             if(key_value == RF24_K03) {
                
-                soft_rurn_off_lights();    
+                soft_turn_off_lights();    
             
             //软开灯
             } else if(key_value == RF24_K04){
@@ -360,7 +567,6 @@ void rf24_key_handle(void)
                 {
                     // 速度减
                     // SPEED-
-
                     ls_speed_sub();
                     fc_meteor_speed();
                 }
@@ -503,7 +709,7 @@ void rf24_key_handle(void)
                 }
             }
         }
-        save_user_data_area3();
+        os_taskq_post("msg_task", 1, MSG_USER_SAVE_INFO);
     }
     else if (rf24_T0 > 150)
     {
@@ -520,6 +726,8 @@ void rf24_key_handle(void)
         last_key_v = NO_KEY;
 
         // code
+
+        printf("key event long\n");
     }
 }
 

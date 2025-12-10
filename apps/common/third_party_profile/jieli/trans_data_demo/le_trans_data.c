@@ -212,7 +212,7 @@ static u8 ancs_info_buffer[ANCS_INFO_BUFFER_SIZE];
 
 //--------------------------------------------------
 void soft_turn_on_the_light(void);   //软开灯处理
-void soft_rurn_off_lights(void);     //软关灯处理
+void soft_turn_off_lights(void);     //软关灯处理
 void Set_Duty(u16 duty1,u16 duty2,u16 duty3);   //设置三个灯的占空比
 //------------------------------------------------------
 #if TEST_AUDIO_DATA_UPLOAD              //0，测试文件上传，未用功能
@@ -932,7 +932,7 @@ static int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_h
                 }
                 else if(LedCommand[2] == 2)
                 {
-                    soft_rurn_off_lights();
+                    soft_turn_off_lights();
                     memcpy(Send_buffer,Ble_Addr, 6);
                     Send_buffer[6] = 0x2F;
                     Send_buffer[7] = 0x02;
@@ -955,7 +955,7 @@ static int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_h
                 //---------------------------------接收到关灯命令-----------------------------------
                 // if(LedCommand[0]==0x01 && LedCommand[1]==0x01 && LedCommand[2]==0 && LedCommandLegth==3)
                 // {
-                //     soft_rurn_off_lights();
+                //     soft_turn_off_lights();
                 // //    LED_state_write_flash();    //保存LED状态
                 // }
                 // 流星模式

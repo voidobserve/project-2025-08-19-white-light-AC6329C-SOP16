@@ -2,7 +2,7 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="sm-ws2812（12）" />
+		<Option title="欣沃达-白光灯长条板" />
 		<Option compiler="q32s_lto_compiler" />
 		<Build>
 			<Target title="Release">
@@ -798,10 +798,6 @@
 		</Unit>
 		<Unit filename="board_ac632n_demo_cfg.h" />
 		<Unit filename="board_config.h" />
-		<Extensions>
-			<code_completion />
-			<envvars />
-			<debugger />
-		</Extensions>
+		<Extensions />
 	</Project>
 </CodeBlocks_project_file>

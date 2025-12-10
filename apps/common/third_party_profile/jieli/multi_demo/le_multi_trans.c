@@ -787,7 +787,7 @@ static uint16_t att_read_callback(hci_con_handle_t connection_handle, uint16_t a
  */
 
 /* LISTING_START(attWrite): ATT Write */
-extern  void save_user_data_area3(void);
+// extern  void save_user_data_area3(void);
 #include "led_strand_effect.h"
 
 extern u8 Ble_Addr[];           //BLE地址
@@ -1004,7 +1004,7 @@ static int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_h
             // if(led_state.OpenorCloseflag == OPEN_STATE)
             #include "led_strip_sys.h"
             extern ON_OFF_FLAG get_on_off_state(void);
-             // 流星灯开关
+            // 流星灯开关
             if(LedCommand[0]==0x2F && LedCommand[1]==0x02)
             {
                 if(LedCommand[2] == 1)
@@ -1019,7 +1019,7 @@ static int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_h
                 }
                 else if(LedCommand[2] == 2)
                 {
-                    soft_rurn_off_lights();
+                    soft_turn_off_lights();
                     memcpy(Send_buffer,Ble_Addr, 6);
                     Send_buffer[6] = 0x2F;
                     Send_buffer[7] = 0x02;
@@ -1027,7 +1027,7 @@ static int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_h
                     app_send_user_data(connection_handle, ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, Send_buffer, 9, ATT_OP_AUTO_READ_CCC);
                
                 }
-                save_user_data_area3();
+                os_taskq_post("msg_task", 1, MSG_USER_SAVE_INFO);
             }
             if(get_on_off_state() )
             {
@@ -1049,7 +1049,7 @@ static int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_h
                     extern void set_mereor_mode(u8 m);
                     set_mereor_mode(LedCommand[2]);
                     printf("\n mereor_mode=%d",LedCommand[2]);
-                    save_user_data_area3();
+                    os_taskq_post("msg_task", 1, MSG_USER_SAVE_INFO);
                     Send_buffer[6] = 0x2F;
                     Send_buffer[7] = 0x00;
                     Send_buffer[8] = LedCommand[2];
@@ -1062,7 +1062,7 @@ static int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_h
                     void set_mereor_speed(u8 s);
                     set_mereor_speed(LedCommand[2]);
                     printf("\n mereor_mode=%d",LedCommand[2]);
-                    save_user_data_area3();
+                    os_taskq_post("msg_task", 1, MSG_USER_SAVE_INFO);
                     Send_buffer[6] = 0x2F; 
                     Send_buffer[7] = 0x01;
                     Send_buffer[8] = LedCommand[2];
@@ -1075,7 +1075,7 @@ static int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_h
                 {
                     extern void set_meteor_p(u8 p);
                     set_meteor_p(LedCommand[2]);
-                    save_user_data_area3();
+                    os_taskq_post("msg_task", 1, MSG_USER_SAVE_INFO);
                     Send_buffer[6] = 0x2F;
                     Send_buffer[7] = 0x03;
                     Send_buffer[8] = LedCommand[2];
@@ -1087,7 +1087,7 @@ static int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_h
                 {
                     extern void set_sensitive(u8 s);
                     set_sensitive(LedCommand[2]);
-                    save_user_data_area3();
+                    os_taskq_post("msg_task", 1, MSG_USER_SAVE_INFO);
                     Send_buffer[6] = 0x2F;
                     Send_buffer[7] = 0x05;
                     Send_buffer[8] = LedCommand[2];
@@ -1122,8 +1122,8 @@ static int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_h
     //         break;
     // #endif
     }
-    extern void save_user_data_area3(void);
-    save_user_data_area3();
+     
+    os_taskq_post("msg_task", 1, MSG_USER_SAVE_INFO);
     return 0;
 
 
