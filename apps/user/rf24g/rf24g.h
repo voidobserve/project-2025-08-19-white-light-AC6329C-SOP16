@@ -126,7 +126,8 @@ typedef struct
 } rf24g_ins_t; // 指令数据
 #pragma pack()
 
-void rf24g_scan(unsigned char *pBuf);
+// void rf24g_scan(unsigned char *pBuf);
+void rf24g_scan(u8 *pBuf, u8 len);
 void rf24g_long_timer(void);
 u8 get_rf24g_long_state(void);
 

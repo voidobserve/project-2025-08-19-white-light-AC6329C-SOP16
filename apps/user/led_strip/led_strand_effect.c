@@ -12,6 +12,8 @@
 #include "ws2812fx_effect.h"
 #include "Adafruit_NeoPixel.H"
 
+#include "le_multi_trans.h"
+
 extern void printf_buf(u8 *buf, u32 len);
 static void static_mode(void);
 static void fc_smear_adjust(void);
@@ -287,6 +289,7 @@ void custom_effect(void)
         fc_effect.custom_index == 3 ||
         fc_effect.custom_index == 4) // 流星效果
     {
+        extern uint16_t WS2812FX_mode_comet_1(void);
         mode_func_ptr = WS2812FX_mode_comet_1;
         meteor_effect_options = size_type[fc_effect.custom_index - 1];
     }
@@ -295,16 +298,19 @@ void custom_effect(void)
              fc_effect.custom_index == 7 ||
              fc_effect.custom_index == 8) // 流星效果
     {
+        extern uint16_t WS2812FX_mode_comet_1(void);
         mode_func_ptr = WS2812FX_mode_comet_1;
         meteor_effect_options = size_type[fc_effect.custom_index - 5] | REVERSE;
     }
     else if (fc_effect.custom_index == 9)
     {
+        extern uint16_t WS2812FX_mode_comet_2(void);
         mode_func_ptr = WS2812FX_mode_comet_2;
         meteor_effect_options = size_type[0];
     }
     else if (fc_effect.custom_index == 10)
     {
+        extern uint16_t WS2812FX_mode_comet_2(void);
         mode_func_ptr = WS2812FX_mode_comet_2;
         meteor_effect_options = size_type[0] | REVERSE;
     }
@@ -823,6 +829,38 @@ void ls_speed_sub(void)
     set_fc_effect();
 }
 
+void sensitive_add(void)
+{
+    const u8 step = 10;
+
+    if (fc_effect.music.s < 100 - step)
+    {
+        fc_effect.music.s += step;
+    }
+    else
+    {
+        fc_effect.music.s = 100;
+    }
+
+    printf("fc_effect.music.s == %u\n", (u16)fc_effect.music.s);
+}
+
+void sensitive_sub(void)
+{
+    const u8 step = 10;
+
+    if (fc_effect.music.s > 0 + step)
+    {
+        fc_effect.music.s -= step;
+    }
+    else
+    {
+        fc_effect.music.s = 0;
+    }
+
+    printf("fc_effect.music.s == %u\n", (u16)fc_effect.music.s);
+}
+
 // --------------------------------------播放
 // 继续播放
 void ls_play(void)
@@ -993,6 +1031,20 @@ void fc_meteor_speed(void)
     extern void zd_fb_2_app(u8 * p, u8 len);
     zd_fb_2_app(Send_buffer, 3);
 }
+
+/**
+ * @brief 向app反馈流星灯的灵敏度
+ *
+ */
+void feedback_meteor_sensitivity(void)
+{
+    u8 send_buffer[3];
+    send_buffer[0] = 0x2F;
+    send_buffer[1] = 0x05;
+    send_buffer[2] = fc_effect.music.s;
+    zd_fb_2_app(send_buffer, 3);
+}
+
 /*--------------------------------------API-----------------------------------*/
 // 触发提示效果，白光闪烁
 void run_white_tips(void)

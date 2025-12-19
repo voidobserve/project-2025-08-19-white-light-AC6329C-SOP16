@@ -43,8 +43,10 @@ rf24g_ins_t rf24g_ins;
 u8 rf24g_rx_flag = 0;
 
 // 底层按键扫描，由 resolve_adv_report() 调用
-void rf24g_scan(u8 *pBuf)
+// void rf24g_scan(u8 *pBuf)
+void rf24g_scan(u8 *pBuf, u8 len)
 {
+#if 0
     rf24g_ins_t *p = (rf24g_ins_t *)pBuf;
     if (p->header1 == HEADER1 && p->header2 == HEADER2)
     {
@@ -52,13 +54,38 @@ void rf24g_scan(u8 *pBuf)
         memcpy((u8 *)&rf24g_ins, pBuf, sizeof(rf24g_ins_t));
         rf24g_rx_flag = 1;
     }
+    else if(p->header1 == HEADER1_1 && p->header2 == HEADER2_1)
+    {
+        // printf_buf(pBuf, sizeof(rf24g_ins_t));
+        memcpy((u8*)&rf24g_ins, pBuf, sizeof(rf24g_ins_t));
+        rf24g_rx_flag = 1;
+    }
+#endif
 
-    // else if(p->header1 == HEADER1_1 && p->header2 == HEADER2_1)
-    // {
-    //     // printf_buf(pBuf, sizeof(rf24g_ins_t));
-    //     memcpy((u8*)&rf24g_ins, pBuf, sizeof(rf24g_ins_t));
-    //     rf24g_rx_flag = 1;
-    // }
+    if (HEADER1 == pBuf[0] &&
+        HEADER2 == pBuf[1] &&
+        7 <= len // 防止越界访问
+    )
+    {
+        rf24g_ins.header1 = pBuf[0];
+        rf24g_ins.header2 = pBuf[1];
+
+        rf24g_ins.key_v = pBuf[2];
+        rf24g_ins.dynamic_code = pBuf[6];
+        rf24g_rx_flag = 1;
+    }
+    else if (HEADER1_1 == pBuf[0] &&
+             HEADER2_1 == pBuf[1] &&
+             7 <= len // 防止越界访问
+    )
+    {
+        rf24g_ins.header1 = pBuf[0];
+        rf24g_ins.header2 = pBuf[1];
+
+        rf24g_ins.key_v = pBuf[5];
+        rf24g_ins.dynamic_code = pBuf[6];
+        rf24g_rx_flag = 1;
+    }
 }
 
 static u16 long_press_cnt; /* 定时10ms++ */

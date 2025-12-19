@@ -22,6 +22,7 @@
 #include "led_strand_effect.h"
 #include "rf24g_app.h"
 
+
 // #if TCFG_RF24GKEY_ENABLE
 #if 1
 extern rf24g_ins_t rf24g_ins;
@@ -153,6 +154,7 @@ void rf24_key_handle(void)
 
         if (rf24g_ins.header1 == 0XDC && rf24g_ins.header2 == 0XDC)
         {
+            printf("key type 1\n");
 
             // printf("key event click\n");
             // printf("key val %u\n", rf24g_ins.key_v);
@@ -178,19 +180,48 @@ void rf24_key_handle(void)
             {
             case RF24G_KEY_VAL_R1C1:
             {
-                // 速度加
-                printf("speed add\n");
-                ls_speed_plus();
-                fc_meteor_speed(); // 向app反馈速度值
+                /*
+                    如果流星灯在普通的模式，调节速度 速度加
+                    如果流星灯在声控模式，调节灵敏度 灵敏度加
+                */
+                if (fc_effect.custom_index == 11 ||
+                    fc_effect.custom_index == 12 ||
+                    fc_effect.custom_index == 13)
+                {
+                    printf("sensitivity add\n");
+                    sensitive_add();
+                    feedback_meteor_sensitivity();
+                }
+                else
+                {
+                    printf("speed add\n");
+                    ls_speed_plus();
+                    fc_meteor_speed(); // 向app反馈速度值
+                }
             }
             break;
             // ======================================================================================
             case RF24G_KEY_VAL_R1C2:
             {
-                // 速度减
-                printf("speed sub\n");
-                ls_speed_sub();
-                fc_meteor_speed(); // 向app反馈速度值
+                /*
+                    如果流星灯在普通的模式，调节速度 速度减
+                    如果流星灯在声控模式，调节灵敏度 灵敏度减
+                */
+                if (fc_effect.custom_index == 11 ||
+                    fc_effect.custom_index == 12 ||
+                    fc_effect.custom_index == 13)
+                {
+                    printf("sensitivity sub\n");
+                    sensitive_sub();
+                    feedback_meteor_sensitivity();
+                }
+                else
+                {
+                    // 速度减
+                    printf("speed sub\n");
+                    ls_speed_sub();
+                    fc_meteor_speed(); // 向app反馈速度值
+                }
             }
             break;
                 // ======================================================================================
@@ -545,6 +576,7 @@ void rf24_key_handle(void)
         }
         else if (rf24g_ins.header1 == 0XCC && rf24g_ins.header2 == 0X02)
         {
+            printf("key type 2\n");
 
             // 软开关灯
             if (key_value == _17_key1)

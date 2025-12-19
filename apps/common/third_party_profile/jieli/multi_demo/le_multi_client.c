@@ -592,8 +592,7 @@ static void client_search_profile_start(void)
 }
 
 //------------------------------------------------------------
-//2.4G广播扫描
-extern void rf24g_scan(u8 *pBuf);
+ 
 static bool resolve_adv_report(u8 *adv_address, u8 data_length, u8 *data, s8 rssi)
 {
     u8 i, lenght, ad_type;
@@ -627,7 +626,9 @@ static bool resolve_adv_report(u8 *adv_address, u8 data_length, u8 *data, s8 rss
         }
 #endif
 
-        rf24g_scan(adv_data_pt);
+        extern void rf24g_scan(u8 *buff, u8 len);
+        // rf24g_scan(adv_data_pt);
+        rf24g_scan(adv_data_pt, lenght - 1);
 // printf_buf(adv_data_pt, lenght);
 
 

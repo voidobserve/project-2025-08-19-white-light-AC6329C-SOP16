@@ -83,6 +83,7 @@ uint16_t WS2812FX_mode_mutil_twihkle(void);
 uint16_t WS2812FX_mode_multi_forward_same(void);
 uint16_t WS2812FX_mode_multi_back_same(void);
 
+uint16_t WS2812FX_mode_comet_1(void);
 uint16_t fc_double_meteor(void);
 // uint16_t WS2812FX_mode_comet_3(void);
 uint16_t WS2812FX_mode_comet_4(void);

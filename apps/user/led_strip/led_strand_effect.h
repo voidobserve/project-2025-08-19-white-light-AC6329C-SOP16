@@ -114,4 +114,9 @@ void full_color_init(void);
 // void soft_turn_on_the_light(void) ;  //软开灯处理
 void ls_set_speed(uint8_t s);
 
+void sensitive_add(void);
+void sensitive_sub(void);
+
+void feedback_meteor_sensitivity(void); 
+
 #endif

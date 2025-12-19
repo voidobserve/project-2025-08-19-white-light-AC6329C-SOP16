@@ -1129,6 +1129,8 @@ obj/Release/apps/user/led_strip/led_strand_effect.o
 -r=obj/Release/apps/user/led_strip/led_strand_effect.o,ls_set_speed,pl
 -r=obj/Release/apps/user/led_strip/led_strand_effect.o,ls_speed_plus,pl
 -r=obj/Release/apps/user/led_strip/led_strand_effect.o,ls_speed_sub,pl
+-r=obj/Release/apps/user/led_strip/led_strand_effect.o,sensitive_add,pl
+-r=obj/Release/apps/user/led_strip/led_strand_effect.o,sensitive_sub,pl
 -r=obj/Release/apps/user/led_strip/led_strand_effect.o,ls_play,pl
 -r=obj/Release/apps/user/led_strip/led_strand_effect.o,WS2812FX_play,l
 -r=obj/Release/apps/user/led_strip/led_strand_effect.o,ls_pause,pl
@@ -1147,6 +1149,7 @@ obj/Release/apps/user/led_strip/led_strand_effect.o
 -r=obj/Release/apps/user/led_strip/led_strand_effect.o,fc_meteor_p,pl
 -r=obj/Release/apps/user/led_strip/led_strand_effect.o,zd_fb_2_app,l
 -r=obj/Release/apps/user/led_strip/led_strand_effect.o,fc_meteor_speed,pl
+-r=obj/Release/apps/user/led_strip/led_strand_effect.o,feedback_meteor_sensitivity,pl
 -r=obj/Release/apps/user/led_strip/led_strand_effect.o,run_white_tips,pl
 -r=obj/Release/apps/user/led_strip/led_strand_effect.o,white_tips,l
 -r=obj/Release/apps/user/led_strip/led_strand_effect.o,WS2812FX_mode_static,l
@@ -1193,7 +1196,6 @@ obj/Release/apps/user/led_strip/led_strip_sys.o
 obj/Release/apps/user/rf24g/rf24g.o
 -r=obj/Release/apps/user/rf24g/rf24g.o,rf24g_get_key_value,pl
 -r=obj/Release/apps/user/rf24g/rf24g.o,rf24g_scan,pl
--r=obj/Release/apps/user/rf24g/rf24g.o,memcpy,l
 -r=obj/Release/apps/user/rf24g/rf24g.o,rf24g_long_timer,pl
 -r=obj/Release/apps/user/rf24g/rf24g.o,get_rf24g_long_state,pl
 -r=obj/Release/apps/user/rf24g/rf24g.o,rf24g_scan_para,pl
@@ -1213,12 +1215,15 @@ obj/Release/apps/user/rf24g/rf24g_app.o
 -r=obj/Release/apps/user/rf24g/rf24g_app.o,syscfg_read,l
 -r=obj/Release/apps/user/rf24g/rf24g_app.o,printf_buf,l
 -r=obj/Release/apps/user/rf24g/rf24g_app.o,rf24_key_handle,pl
+-r=obj/Release/apps/user/rf24g/rf24g_app.o,printf,l
 -r=obj/Release/apps/user/rf24g/rf24g_app.o,soft_turn_off_lights,l
 -r=obj/Release/apps/user/rf24g/rf24g_app.o,soft_turn_on_the_light,l
 -r=obj/Release/apps/user/rf24g/rf24g_app.o,get_on_off_state,l
--r=obj/Release/apps/user/rf24g/rf24g_app.o,printf,l
+-r=obj/Release/apps/user/rf24g/rf24g_app.o,sensitive_add,l
+-r=obj/Release/apps/user/rf24g/rf24g_app.o,feedback_meteor_sensitivity,l
 -r=obj/Release/apps/user/rf24g/rf24g_app.o,ls_speed_plus,l
 -r=obj/Release/apps/user/rf24g/rf24g_app.o,fc_meteor_speed,l
+-r=obj/Release/apps/user/rf24g/rf24g_app.o,sensitive_sub,l
 -r=obj/Release/apps/user/rf24g/rf24g_app.o,ls_speed_sub,l
 -r=obj/Release/apps/user/rf24g/rf24g_app.o,add_meteor_mode,l
 -r=obj/Release/apps/user/rf24g/rf24g_app.o,sub_meteor_mode,l

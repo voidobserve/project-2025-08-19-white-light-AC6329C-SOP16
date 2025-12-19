@@ -2352,16 +2352,6 @@ void main_while(viod)
     rf24g_long_timer();
     WS2812FX_service();
     meteor_period_sub();
-
-    // {
-    //     static u8 cnt = 0;
-    //     cnt++;
-    //     if (cnt >= 100)
-    //     {
-    //         cnt = 0;
-    //         printf("main circle\n");
-    //     }
-    // }
 }
 
 void led_main(void)
