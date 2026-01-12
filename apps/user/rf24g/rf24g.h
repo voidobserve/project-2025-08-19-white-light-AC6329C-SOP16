@@ -1,6 +1,8 @@
 #ifndef __RF24G_H__
 #define __RF24G_H__
 
+#if 0
+
 // 硬件按键值定义
 // 3V 2.4G遥控
 #define RF24_K01 0x11
@@ -130,5 +132,7 @@ typedef struct
 void rf24g_scan(u8 *pBuf, u8 len);
 void rf24g_long_timer(void);
 u8 get_rf24g_long_state(void);
+
+#endif
 
 #endif

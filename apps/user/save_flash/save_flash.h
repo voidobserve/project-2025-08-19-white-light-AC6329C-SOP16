@@ -16,7 +16,7 @@ typedef struct
     unsigned char header;           //头部
     fc_effect_t fc_save;
     int8_t ble_state;
-    u32 rf433_code;
+    // u32 rf433_code;
 }save_flash_t;
 #pragma pack ()
 

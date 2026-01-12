@@ -1,5 +1,5 @@
-#ifndef GENERIC_CPU_H
-#define GENERIC_CPU_H
+#ifndef __GENERIC_CPU_H__
+#define __GENERIC_CPU_H__
 
 #include <asm/cpu.h>
 

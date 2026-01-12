@@ -24,7 +24,7 @@
 
 
 // #if TCFG_RF24GKEY_ENABLE
-#if 1
+#if 0
 extern rf24g_ins_t rf24g_ins;
 #define PAIR_MAX 2
 

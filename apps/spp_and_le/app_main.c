@@ -25,7 +25,6 @@
 #include "btstack/bluetooth.h"
 #include "key_app.h"
 #include "local_music.h"
-#include "rf433.h"
 #if TCFG_KWS_VOICE_RECOGNITION_ENABLE
 #include "jl_kws/jl_kws_api.h"
 #endif /* #if TCFG_KWS_VOICE_RECOGNITION_ENABLE */
@@ -40,6 +39,7 @@
 #include "debug.h"
 
 #include "save_flash.h"
+#include "rf433_key.h"
 
 OS_SEM LedStaticSem;
 OS_SEM LedActionSem;
@@ -249,9 +249,8 @@ ___interrupt
     }
 #endif
 
-#if TCFG_RF433_ENABLE
-    extern void timer125us_hook(void);
-    timer125us_hook();
+#if RF_433_KEY_ENABLE
+    rf_433_key_decode_isr();
 #endif
 
 #if 0
@@ -1498,117 +1497,7 @@ void ir_key_tips(void)
         switch_static_task();
     }
 }
-/****************************************************************************************
-**名称:灯条刷新任务(弃用)
-**功能:
-**说明:通过颜色+亮度计算出RGB的占空比，并刷新，刷新频率是50Hz
-**备注:
-**日期:
-*****************************************************************************************/
-/*
-void led_refresh_task_handle(void*p)
-{
-    u32 err;
-    static u32 redled_duty,blueled_duty,greenled_duty;
 
-    timer_pwm_init(JL_TIMER0, IO_PORTA_02, 100, 2000);  //用timer0做pwm
-
-    user_timer_init();      //定时器2设置
-    led_state_init();       //初始化LED状态参数
-    led_gpio_init();        //RGB控制脚初始化
-
-//    capture_cycle_time_init();    //用定时器3作捕获
-
-    os_sem_create(&LedStaticSem,0);     //创建静态信号量
-    os_sem_create(&LedActionSem,0);     //创建动态信号量
-
-    task_create(led_action_task_handle, NULL, "led_action");            //创建LED动态操作任务
-    task_create(led_static_task_handle, NULL, "led_static");            //创建LED静态操作任务
-    task_create(ir_key_task_handle, NULL, "ir_key");                    //创建红外遥控处理任务
-    task_create(phase_sequence_task_handle, NULL, "phase_sequence");    //创建遥控器调整相序任务
-    task_create(music_led_task_handle, NULL, "music_led");              //创建IOS音乐律动任务
-    task_create(mic_led_task_handle, NULL, "mic_led");                  //创建IOS麦克风任务
-    task_create(android_led_task_handle, NULL, "android_led");          //创建安卓版音乐与麦克风任务
-    task_create(alarm_clock_task_handle, NULL, "alarm_clock");          //创建闹钟任务
-
-
-    if(led_state.running_task == DYNAMIC_TASK)
-        os_sem_post(&LedActionSem);
-    else if(led_state.running_task == STATIC_TASK)
-        os_sem_post(&LedStaticSem);
-
-//    printf("----------------running led_refresh_task\n");
-    while(1)
-    {
-        redled_duty = led_state.R_flag*led_state.ledlight*100/255;
-        blueled_duty = led_state.G_flag*led_state.ledlight*100/255;
-        greenled_duty = led_state.B_flag*led_state.ledlight*100/255;
-
-        Set_Duty(redled_duty,blueled_duty,greenled_duty);
-
-        os_time_dly(1);
-    }
-}
-*/
-/****************************************************************************************
-**名称:遥控器调整相序任务
-**功能:
-**说明:
-**备注:
-**日期:
-*****************************************************************************************/
-/*
-static void phase_sequence_task_handle(void*p)
-{
-    u32 err;
-    u8 count,temp;
-
-    os_sem_create(&phaseSequenceSem,0);         //创建调整相序信号量
-
-    while(1)
-    {
-        err = os_sem_pend(&phaseSequenceSem, 0);
- //       printf("----------------running phase_sequence_task\n");
-        LED_ON;
-        count = 1;
-        temp = 0;
-        led_state.ledlight = 100;
-        led_state.interface_mode = LED_R_G_B;
-        while(led_state.running_task == PHASE_SEQUENCE)
-        {
-            switch(count)
-            {
-                case 1:  temp = 1;   led_state.R_flag = 0xff, led_state.G_flag = 0;     led_state.B_flag = 0;           break;
-                case 2:  temp = 2;   led_state.R_flag = 0,    led_state.G_flag = 0xff;  led_state.B_flag = 0;           break;
-                case 3:  temp = 3;   led_state.R_flag = 0,    led_state.G_flag = 0;     led_state.B_flag = 0xff;        break;
-                case 4:  temp = 4;   led_state.R_flag = 0,    led_state.G_flag = 0;     led_state.B_flag = 0;           break;
-                case 5:  temp = 5;   led_state.R_flag = 0xff, led_state.G_flag = 0;     led_state.B_flag = 0;           break;
-                case 6:  temp = 6;   led_state.R_flag = 0,    led_state.G_flag = 0xff;  led_state.B_flag = 0;           break;
-                case 7:  temp = 7;   led_state.R_flag = 0,    led_state.G_flag = 0;     led_state.B_flag = 0xff;        break;
-                case 8:  temp = 8;   led_state.R_flag = 0,    led_state.G_flag = 0;     led_state.B_flag = 0;           break;
-            }
-            display_led();
-            count++;
-            if(count>8)
-                count = 1;
-            os_time_dly(150);
-        }
-        switch(temp)
-        {
-            case 1:     save_led_state.interface_mode = LED_R_G_B;   break;
-            case 2:     save_led_state.interface_mode = LED_G_R_B;   break;
-            case 3:     save_led_state.interface_mode = LED_B_R_G;   break;
-            case 5:     save_led_state.interface_mode = LED_R_B_G;   break;
-            case 6:     save_led_state.interface_mode = LED_G_B_R;   break;
-            case 7:     save_led_state.interface_mode = LED_B_G_R;   break;
-            default:    break;
-        }
-        save_led_state.running_task  = STATIC_TASK;
-        save_led_state.static_state_flag = RED;
-        soft_turn_on_the_light();   //软开灯
-//        printf("----------------exit phase_sequence_task\n");
-    }-
-}*/
 /****************************************************************************************
 **名称:红，蓝，绿，灭，颜色跳变
 **功能:
@@ -1731,286 +1620,7 @@ static void phase_sequence_task_handle(void *p)
         }
     }
 }
-/****************************************************************************************
-**名称:IOS音乐律动任务
-**功能:阻塞等待APP发能量值过来，再根据能量值做操作
-**说明:
-**备注:
-**日期:
-*****************************************************************************************/
-/*
-static void music_led_task_handle(void*p)
-{
-    u32 err;
-    int msg[9] = {0,0,0,0,0,0,0,0,0};
-    int res = 0;
-    u8 R_flag,G_flag,B_flag,light,colour_step;
-    u32 redled_duty,blueled_duty,greenled_duty;
-    u8 time_count=1,last_music_val,val;
-    u32 music_val;
 
-    colour_step = 1;
-    light = 100;
- //   printf("----------------running music_led_task\n");
-    while(1)
-    {
-        res = os_task_pend("taskq", msg, ARRAY_SIZE(msg));  //阻塞方式等待消息队例信息
-        if (res != OS_TASKQ) {
-            continue;
-        }
-        if(msg[0] == Q_USER)
-            music_val = msg[1];
-
-        switch(colour_step)
-        {
-            case 1:     R_flag = 0xff, G_flag = 0;     B_flag = 0;       break;            //红
-            case 2:     R_flag = 0,    G_flag = 0xff;  B_flag = 0;       break;            //蓝
-            case 3:     R_flag = 0,    G_flag = 0;     B_flag = 0xff;    break;            //绿
-            case 4:     R_flag = 0xff, G_flag = 0xff;  B_flag = 0;       break;            //黄
-            case 5:     R_flag = 0,    G_flag = 0xff;  B_flag = 0xff;    break;            //青
-            case 6:     R_flag = 0xff, G_flag = 0;     B_flag = 0xff;    break;            //紫
-            case 7:     R_flag = 0xff, G_flag = 0xff;  B_flag = 0xff;    break;            //白
-        }
-
-        redled_duty = R_flag*light*100/255;
-        blueled_duty = G_flag*light*100/255;
-        greenled_duty = B_flag*light*100/255;
-        Set_Duty(redled_duty,blueled_duty,greenled_duty);
-
-        if(music_val > 30)
-        {
-            if(music_val > last_music_val)
-            {
-                val = music_val - last_music_val;
-                if(val > 5)
-                {
-                    colour_step++;
-                    if(colour_step>7)
-                        colour_step = 1;
-                }
-            }
-        }
-        last_music_val = music_val;
-
-        time_count++;
-        if(time_count > 2)
-        {
-            time_count = 1;
-
-            if(music_val >= 20 && music_val < 30)
-                music_val = (music_val-20)*5;
-            else if(music_val >= 30 && music_val < 40)
-                music_val = 5+(music_val-30)*5;
-            else if(music_val >= 40 && music_val < 50)
-                music_val = 10+(music_val-40)*6;
-            else if(music_val >= 50 && music_val < 60)
-                music_val = 15+(music_val-50)*6;
-            else if(music_val >= 60 && music_val < 70)
-                music_val = 20+(music_val-60)*7;
-            else if(music_val >= 70 && music_val < 80)
-                music_val = 30+(music_val-70)*7;
-            else
-                music_val = 0;
-            light = music_val;
-        }
-        else
-            if(light > 20)
-                light -= 10;
-    }
-}
-*/
-/****************************************************************************************
-**名称:IOS麦克风任务
-**功能:阻塞等待APP发能量值过来，再根据能量值做操作
-**说明:
-**备注:
-**日期:
-*****************************************************************************************/
-/*
-static void mic_led_task_handle(void*p)
-{
-    u32 err;
-    u8 R_flag,G_flag,B_flag,light,colour_step;
-    u32 redled_duty,blueled_duty,greenled_duty;
-    u8 time_count=1,last_mic_val,val;
-
-    colour_step = 1;
-    light = 100;
- //   printf("----------------running mic_led_task\n");
-    while(1)
-    {
-//        res = os_task_pend("taskq", msg, ARRAY_SIZE(msg));  //阻塞方式等待消息队例信息
-//        if (res != OS_TASKQ) {
-//            continue;
-//        }
-//       if(msg[0] == Q_USER)
-//            music_val = msg[1];
-
-        err = os_sem_pend(&mic_led_Sem, 0);
-
-        switch(colour_step)
-        {
-            case 1:     R_flag = 0xff, G_flag = 0;     B_flag = 0;       break;            //红
-            case 2:     R_flag = 0,    G_flag = 0xff;  B_flag = 0;       break;            //蓝
-            case 3:     R_flag = 0,    G_flag = 0;     B_flag = 0xff;    break;            //绿
-            case 4:     R_flag = 0xff, G_flag = 0xff;  B_flag = 0;       break;            //黄
-            case 5:     R_flag = 0,    G_flag = 0xff;  B_flag = 0xff;    break;            //青
-            case 6:     R_flag = 0xff, G_flag = 0;     B_flag = 0xff;    break;            //紫
-            case 7:     R_flag = 0xff, G_flag = 0xff;  B_flag = 0xff;    break;            //白
-        }
-        redled_duty = R_flag*light*100/255;
-        blueled_duty = G_flag*light*100/255;
-        greenled_duty = B_flag*light*100/255;
-        Set_Duty(redled_duty,blueled_duty,greenled_duty);
-
-        if(mic_val >= 40)
-        {
-            if(mic_val > last_mic_val)
-            {
-                val = mic_val - last_mic_val;
-                if(val > 30)
-                {
-                    colour_step++;
-                    if(colour_step>7)
-                        colour_step = 1;
-                }
-            }
-            last_mic_val = mic_val;
-        }
-        time_count++;
-        if(time_count > 2)
-        {
-            time_count = 1;
-
-            if(mic_val >= 40 && mic_val <= 80)
-            {
-                if(mic_val > last_mic_val)
-                {
-                    val = mic_val - last_mic_val;
-                    if(val > 30)
-                    {
-                        colour_step++;
-                        if(colour_step>7)
-                            colour_step = 1;
-                    }
-                }
-                last_mic_val = mic_val;
-                mic_val = 10+(mic_val-40)*90/40;
-
-            }
-            else
-                mic_val = 0;
-            light = mic_val;
-        }
-    }
-}
-*/
-/****************************************************************************************
-**名称:IOS麦克风任务
-**功能:阻塞等待APP发能量值过来，再根据能量值做操作
-**说明:
-**备注:
-**日期:
-*****************************************************************************************/
-/*
-void mic_led_task_handle(void*p)
-{
-    int res = 0;
-    int msg[9] = {0,0,0,0,0,0,0,0,0};
-    u8 tim=5,op_time,count=0,Sound_val;
-    u32 h_val,s_val,v_val,r_val,g_val,b_val,r_step,g_step,b_step,sond_last;
-    u8 R_flag,G_flag,B_flag,colour_step;
-    u32 redled_duty,blueled_duty,greenled_duty;
-
-    colour_step = 1;
-    printf("----------------running mic_led_task\n");
-    while(1)
-    {
-        res = os_task_pend("taskq", msg, ARRAY_SIZE(msg));  //阻塞方式等待消息队例信息
-        if (res != OS_TASKQ) {
-            continue;
-        }
-        if(msg[0] == Q_USER)
-        {
-            Sound_val = msg[1];
-            led_state.running_task = MIC_LED;
-        }
-        else
-            continue;
-
-        r_val=0;
-        g_val=0;
-        b_val=0;
-        r_step=0;
-        g_step=0;
-        b_step=0;
-        count=0;
-
-        if(Sound_val>50)
-            {
-                if(Sound_val >= sond_last+20)
-                {
-                    colour_step++;
-                    if(colour_step>6)
-                        colour_step=0;
-                }
-                sond_last = Sound_val;
-                switch(colour_step)
-                {
-                    case 0:     R_flag = 0xff, G_flag = 0;     B_flag = 0;       break;            //红
-                    case 1:     R_flag = 0,    G_flag = 0xff;  B_flag = 0;       break;            //蓝
-                    case 2:     R_flag = 0,    G_flag = 0;     B_flag = 0xff;    break;            //绿
-                    case 3:     R_flag = 0xff, G_flag = 0xff;  B_flag = 0;       break;            //黄
-                    case 4:     R_flag = 0,    G_flag = 0xff;  B_flag = 0xff;    break;            //青
-                    case 5:     R_flag = 0xff, G_flag = 0;     B_flag = 0xff;    break;            //紫
-                    case 6:     R_flag = 0xff, G_flag = 0xff;  B_flag = 0xff;    break;            //白
-                }
-
-                r_val = R_flag*100*Sound_val/100;
-                g_val = G_flag*100*Sound_val/100;
-                b_val = B_flag*100*Sound_val/100;
-
-                r_step = r_val/tim;
-                g_step = g_val/tim;
-                b_step = b_val/tim;
-            }
-
-        while(led_state.running_task == MIC_LED)
-        {
-            if(Sound_val>50)
-            {
-                if(r_val >= r_step)
-                    r_val -= r_step;
-
-                if(g_val >= g_step)
-                    g_val -= g_step;
-
-                if(b_val >= b_step)
-                    b_val -= b_step;
-
-                redled_duty = r_val*led_state.ledlight/255;
-                blueled_duty = g_val*led_state.ledlight/255;
-                greenled_duty = b_val*led_state.ledlight/255;
-                Set_Duty(redled_duty,blueled_duty,greenled_duty);
-            }
-            else
-            {
-                count++;
-                if(count>10)
-                {
-                    count = 0;
-                    redled_duty = rand() % 100;
-                    blueled_duty = rand() % 100;
-                    greenled_duty = rand() % 100;
-                    Set_Duty(redled_duty,blueled_duty,greenled_duty);
-                }
-
-            }
-            os_time_dly(1);
-        }
-    }
-}
-*/
 /****************************************************************************************
 **名称:安卓版的音乐律动和麦克风任务（IOS和安卓统一用这个）
 **功能:APP直接发RGB数值过来，不需要处理，直接在灯条上显示即可
@@ -2045,98 +1655,7 @@ static void android_led_task_handle(void *p)
         //        printf("R_flag = %d,G_flag = %d,B_flag = %d,ledlight = %d",led_state.R_flag,led_state.G_flag,led_state.B_flag,led_state.ledlight);
     }
 }
-/****************************************************************************************
-**名称:闹钟任务
-**功能:上电后创建任务，创建任务后先发指令获取当前时间，然后计时
-**说明:
-**备注:
-**日期:
-*****************************************************************************************/
-static void alarm_clock_task_handle(void *p)
-{
 
-    /*--------设置初始时间----------*/
-    time_clock.hour = 12;
-    time_clock.minute = 0;
-    time_clock.second = 0;
-    time_clock.week = 1;
-
-    alarm_clock[0].on_off = 0;
-    alarm_clock[0].hour = 0;
-    alarm_clock[0].minute = 0;
-    alarm_clock[0].mode = 0;
-
-    alarm_clock[1].on_off = 0;
-    alarm_clock[1].hour = 0;
-    alarm_clock[1].minute = 0;
-    alarm_clock[1].mode = 0;
-
-    alarm_clock[2].on_off = 0;
-    alarm_clock[2].hour = 0;
-    alarm_clock[2].minute = 0;
-    alarm_clock[2].mode = 0;
-
-    while (1)
-    {
-        // printf("running alarm_clock_task>>>>>\n");
-
-        os_time_dly(100); // 延时一秒
-        ir_auto_change_mode();
-        ir_timer_handle();
-        /*------计时-------*/
-        time_clock.second++;
-        if (time_clock.second >= 60)
-        {
-            time_clock.second = 0;
-            time_clock.minute++;
-            if (time_clock.minute >= 60)
-            {
-                time_clock.minute = 0;
-                time_clock.hour++;
-                if (time_clock.hour >= 24)
-                {
-                    time_clock.hour = 0;
-                    time_clock.week++;
-                    if (time_clock.week >= 8)
-                        time_clock.week = 1;
-                }
-            }
-        }
-        if (alarm_clock[0].on_off == 0x80) // 第一个闹钟开启
-        {
-            if (alarm_clock[0].hour == time_clock.hour && alarm_clock[0].minute == time_clock.minute && time_clock.second == 0 && ((alarm_clock[0].mode >> (time_clock.week - 1)) & 0x01)) // 定时时间到
-            {
-                if (alarm_clock[0].mode & 0x80)
-                    soft_turn_on_the_light();
-                else
-                    soft_turn_off_lights();
-            }
-        }
-        if (alarm_clock[1].on_off == 0x80) // 第二个闹钟开启
-        {
-            if (alarm_clock[1].hour == time_clock.hour && alarm_clock[1].minute == time_clock.minute && time_clock.second == 0 && ((alarm_clock[1].mode >> (time_clock.week - 1)) & 0x01)) // 定时时间到
-            {
-                if (alarm_clock[1].mode & 0x80)
-                    soft_turn_on_the_light();
-                else
-                    soft_turn_off_lights();
-            }
-        }
-        if (alarm_clock[2].on_off == 0x80) // 第二个闹钟开启
-        {
-            if (alarm_clock[2].hour == time_clock.hour && alarm_clock[2].minute == time_clock.minute && time_clock.second == 0 && ((alarm_clock[2].mode >> (time_clock.week - 1)) & 0x01)) // 定时时间到
-            {
-                if (alarm_clock[2].mode & 0x80)
-                    soft_turn_on_the_light();
-                else
-                    soft_turn_off_lights();
-            }
-        }
-        //        printf("hour = %d,minute = %d,second = %d,week = %d\n",time_clock.hour,time_clock.minute,time_clock.second,time_clock.week);
-        //        printf("alarm_clock[0].on_off = %d,alarm_clock[0].hour = %d,alarm_clock[0].minute = %d,alarm_clock[0].mode = %d\n",alarm_clock[0].on_off,alarm_clock[0].hour,alarm_clock[0].minute,alarm_clock[0].mode);
-        //        printf("alarm_clock[1].on_off = %d,alarm_clock[1].hour = %d,alarm_clock[1].minute = %d,alarm_clock[1].mode = %d\n",alarm_clock[1].on_off,alarm_clock[1].hour,alarm_clock[1].minute,alarm_clock[1].mode);
-    }
-}
 /****************************************************************************************
 **名称:应用主程序
 **功能:用于应用初始化及创建各个任务
@@ -2166,75 +1685,6 @@ u32 adc_total[15];   // __attribute__((aligned(4)));
 // 声控
 void sound_handle(void)
 {
-#if 0
-    extern u32 adc_get_value(u32 ch);
-    extern void WS2812FX_trigger();
-    u16 adc;
-    u8 i, trg, trg_v;
-    u32 adc_all, adc_ttl;
-
-    extern u32 adc_sample(u32 ch);
-    // 记录adc值
-    adc = adc_get_value(AD_CH_PA8);
-
-    // adc = adc_sample(AD_CH_PA8);
-    // printf("adc = %d", adc);
-
-    if (adc < 1000) // 当ADC值大于1000，说明硬件电路有问题
-    {
-
-        if (adc_sum_n < 2000)
-        {
-            adc_sum_n++;
-        }
-        if (adc_sum_n == 2000)
-        {
-            if (adc / (adc_sum / adc_sum_n) > 3)
-                return; // adc突变，大于平均值的3倍，丢弃改值
-            adc_sum = adc_sum - adc_sum / adc_sum_n;
-        }
-        adc_sum += adc;
-
-        adc_v_n %= SAMPLE_N;
-        adc_v[adc_v_n] = adc;
-        adc_v_n++;
-        adc_all = 0;
-        for (i = 0; i < SAMPLE_N; i++)
-        {
-            adc_all += adc_v[i];
-        }
-
-        adc_avrg_n %= 10;
-        adc_avrg[adc_avrg_n] = adc_all / SAMPLE_N;
-        adc_avrg_n++;
-        // printf("%d,",adc_all / SAMPLE_N);
-        adc_ttl = 0;
-        for (i = 0; i < 10; i++)
-        {
-            adc_ttl += adc_avrg[i];
-        }
-        memmove((u8 *)adc_total, (u8 *)adc_total + 4, 14 * 4);
-        adc_total[14] = adc_ttl / 10; // 总数平均值
-
-        // 查找峰值
-        trg = 0;
-
-        {
-            if (adc_sum_n != 0)
-            {
-                extern void set_mss(uint16_t s);
-                set_mss(adc + (adc)*fc_effect.music.s / 100);
-                if (adc * fc_effect.music.s / 100 > adc_sum / adc_sum_n)
-                {
-                    // printf("\n adc=%d",adc);
-                    // printf("\n adc_sum/adc_sum_n=%d",adc_sum/adc_sum_n);
-                    music_trigger = 1;
-                    WS2812FX_trigger(); // 让主函数扫描到，立即更新动画，否则看起来声控的灵敏度会差一些
-                }
-            }
-        }
-    }
-#endif
 
 #if 1 // 移植其他项目的声控程序
 
@@ -2336,20 +1786,21 @@ void sound_handle(void)
 
 // 10ms调用一次
 // 实际测试后，目前是1ms调用一次
-void main_while(viod)
+void main_while(void)
 {
-    u8 i;
+    // u8 i;
     extern void run_tick_per_10ms(void);
     extern void WS2812FX_service();
     extern u8 get_sound_result(void);
     extern void meteor_period_sub(void);
 
-    rf433_handle(&i);
+    // rf433_handle(&i);
     run_tick_per_10ms();
 
-    rf433_long_timer();
-    rf24_key_handle();
-    rf24g_long_timer();
+    // rf433_long_timer();
+    // rf24_key_handle();
+    // rf24g_long_timer();
+
     WS2812FX_service();
     meteor_period_sub();
 }
@@ -2375,9 +1826,9 @@ void led_main(void)
     full_color_init();
     mic_gpio_init(); // MIC 引脚初始化
     led_pwr_on();
-#if TCFG_RF433_ENABLE
-    extern void rf433_gpio_init(void);
-    rf433_gpio_init();
+
+#if RF_433_KEY_ENABLE
+    rf_433_key_config();
 #endif
 
     /*
@@ -2465,6 +1916,8 @@ void user_task(void *p)
     while (1)
     {
         sound_handle();
+
+        rf_433_key_event_handle();
 
         save_user_data_time_count_down();
         save_user_data_handle();

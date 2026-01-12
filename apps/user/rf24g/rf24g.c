@@ -18,7 +18,7 @@
 #include "board_ac632n_demo_cfg.h"
 #include "rf24g.h"
 // #if TCFG_RF24GKEY_ENABLE
-#if 1
+#if 0
 u8 rf24g_get_key_value(void);
 
 struct key_driver_para rf24g_scan_para = {

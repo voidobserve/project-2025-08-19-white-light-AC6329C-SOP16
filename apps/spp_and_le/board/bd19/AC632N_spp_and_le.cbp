@@ -612,6 +612,7 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../../../user/led_strip/led_strip_sys.h" />
+		<Unit filename="../../../user/led_strip/paint_tool.h" />
 		<Unit filename="../../../user/rf24g/rf24g.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -620,12 +621,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../../../user/rf24g/rf24g_app.h" />
-		<Unit filename="../../../user/rf433/rf433.c">
+		<Unit filename="../../../user/rf433/rf433_key.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="../../../user/rf433/rf433_app.c">
-			<Option compilerVar="CC" />
-		</Unit>
+		<Unit filename="../../../user/rf433/rf433_key.h" />
 		<Unit filename="../../../user/save_flash/save_flash.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -637,6 +636,9 @@
 		</Unit>
 		<Unit filename="../../../user/ws2812-fx-lib/WS2812FX_C/WS2812FX.H" />
 		<Unit filename="../../../user/ws2812-fx-lib/WS2812FX_C/binary.h" />
+		<Unit filename="../../../user/ws2812-fx-lib/WS2812FX_C/my_effect.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="../../../user/ws2812-fx-lib/WS2812FX_C/my_effect.h" />
 		<Unit filename="../../../user/ws2812-fx-lib/WS2812FX_C/ws2812_bsp.h" />
 		<Unit filename="../../../user/ws2812-fx-lib/WS2812FX_C/ws2812_drive.c">

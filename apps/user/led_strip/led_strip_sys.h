@@ -1,5 +1,5 @@
-#ifndef led_srtip_sys_h
-#define led_srtip_sys_h
+#ifndef __led_srtip_sys_h__
+#define __led_srtip_sys_h__
 
 
 // 控灯系统属性

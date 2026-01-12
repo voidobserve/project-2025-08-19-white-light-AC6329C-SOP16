@@ -626,10 +626,10 @@ static bool resolve_adv_report(u8 *adv_address, u8 data_length, u8 *data, s8 rss
         }
 #endif
 
-        extern void rf24g_scan(u8 *buff, u8 len);
+        // extern void rf24g_scan(u8 *buff, u8 len);
         // rf24g_scan(adv_data_pt);
-        rf24g_scan(adv_data_pt, lenght - 1);
-// printf_buf(adv_data_pt, lenght);
+        // rf24g_scan(adv_data_pt, lenght - 1);
+        // printf_buf(adv_data_pt, lenght);
 
 
         switch (ad_type) {

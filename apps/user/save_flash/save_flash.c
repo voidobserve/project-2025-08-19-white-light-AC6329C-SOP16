@@ -2,7 +2,7 @@
 #include "system/includes.h"
 #include "syscfg_id.h"
 #include "save_flash.h"
-#include "rf433.h"
+
 #define CFG_USER_LED_LEDGTH_DATA 3
 
 /*
@@ -23,10 +23,8 @@
 static volatile u16 time_count_down = 0; // 存放当前的倒计时
 static volatile u8 flag_is_enable_count_down = 0;
 static volatile u8 flag_is_enable_to_save = 0; // 标志位，是否使能了保存
-
-extern sys_cb_t sys_cb;
-u8 ble_state; // 默认开启BLE模块
-extern u32 RF433_CODE;
+ 
+u8 ble_state; // 默认开启BLE模块 
 
 /*******************************************************************************************************
 **函数名：上电读取FLASH里保存的指令数据
@@ -67,8 +65,7 @@ void read_flash_device_status_init(void)
         memcpy((u8 *)(&fc_effect), (u8 *)(&save_flash3.fc_save), sizeof(fc_effect_t));
         set_custom_index(fc_effect.custom_index); // 设置动画索引
         set_sensitive(fc_effect.music.s);         // 设置灵敏度
-        ble_state = save_flash3.ble_state;
-        RF433_CODE = save_flash3.rf433_code;
+        ble_state = save_flash3.ble_state; 
     }
 
 #endif
@@ -115,8 +112,7 @@ static void save_user_data_area3(void)
     // fc_effect.on_off_flag = DEVICE_ON;
     fc_effect.sensitive = get_sensitive();
     fc_effect.custom_index = get_custom_index();
-    save_data.ble_state = ble_state;
-    save_data.rf433_code = RF433_CODE;
+    save_data.ble_state = ble_state; 
     memcpy((u8 *)(&save_data.fc_save), (u8 *)(&fc_effect), sizeof(fc_effect_t));
     os_time_dly(1); // 先让出cpu，处理其他任务，防止看门狗复位
 
