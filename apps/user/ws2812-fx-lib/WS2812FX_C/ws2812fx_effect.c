@@ -9,136 +9,6 @@ extern Segment *_seg;
 extern uint16_t _seg_len;
 extern Segment_runtime *_seg_rt;
 
-/* ****************项目专属效果******************************* */
-
-#if 0
-// 单色灯,做流星效果
-uint16_t WS2812FX_mode_comet_1(void)
-{
-  extern u8 get_effect_p(void);
-  // 计时中，模式循环完成
-
-  // printf("\n mode_cycle=%d",fc_effect.mode_cycle);  
-  // printf("\n fc_effect.period_cnt=%d",fc_effect.period_cnt);                                                               
-  if( (get_effect_p() == 1) && (fc_effect.mode_cycle == 1) )
-  {
-    return (_seg->speed );
-  } 
-  WS2812FX_fade_out();
-  extern u8 get_custom_index(void);
-  u8 offset;
-  // if(get_custom_index() < 5)
-  // {
-  //   offset = get_custom_index()*3+2;
-  // }
-  // else
-  // {
-  //   offset = (get_custom_index() - 4)*3;
-  // }
-  offset = 13;
-  if(IS_REVERSE) {
-  if(_seg_rt->aux_param == 0)
-  {
-    // _seg_rt->counter_mode_step = _seg->stop;
-    _seg_rt->aux_param = 1;
-  }
-  if((_seg->stop - _seg->start) >=_seg_rt->counter_mode_step)
-  {
-    WS2812FX_setPixelColor(_seg->stop - _seg_rt->counter_mode_step, _seg->colors[0]);
-    // printf("\n _seg_rt->counter_mode_step=%d",_seg_rt->counter_mode_step);  
-  }
-  } else {
-    if(_seg_rt->counter_mode_step < _seg->stop+1)
-    WS2812FX_setPixelColor(_seg->start + _seg_rt->counter_mode_step, _seg->colors[0]);
-
-  }
-
-  _seg_rt->counter_mode_step = (_seg_rt->counter_mode_step + 1) % (_seg_len + offset);
-  if(_seg_rt->counter_mode_step == 0)
-  {
-    SET_CYCLE;
-    fc_effect.mode_cycle = 1;
-    // printf("\n fc_effect.mode_cycle=%d",fc_effect.mode_cycle);
-  } 
-
-  return (_seg->speed );
-}
-
-// 两段流星灯，向中心靠拢
-uint16_t WS2812FX_mode_comet_2(void)
-{
-  extern u8 get_effect_p(void);
-  // 计时中，模式循环完成
-  // printf("\n fc_effect.mode_cycle=%d",fc_effect.mode_cycle);
-  // printf("\n fc_effect.period_cnt=%d",fc_effect.period_cnt);
-
-  if( (get_effect_p() == 1) && (fc_effect.mode_cycle == 1) )
-  {
-    return (_seg->speed );
-  } 
-  WS2812FX_fade_out();
-  extern u8 get_custom_index(void);
-  u8 offset;
-
-  offset = 7;
-
-    if(_seg_rt->counter_mode_step < 5)
-    {
-      WS2812FX_setPixelColor(_seg->start + 5 + _seg_rt->counter_mode_step, _seg->colors[0]);
-      
-    }
-
-  if(_seg_rt->counter_mode_step < 5)
-  WS2812FX_setPixelColor(_seg->start + _seg_rt->counter_mode_step, _seg->colors[0]);
-
-  _seg_rt->counter_mode_step = (_seg_rt->counter_mode_step + 1) % (_seg_len + offset);
-  if(_seg_rt->counter_mode_step == 0)
-  {
-    SET_CYCLE;
-    fc_effect.mode_cycle = 1;
-    // printf("\n fc_effect.mode_cycle=%d",fc_effect.mode_cycle);
-  } 
-
-  return (_seg->speed );
-}
-
-//从中心发散
-uint16_t WS2812FX_mode_comet_3(void)
-{
-  extern u8 get_effect_p(void);
-  // 计时中，模式循环完成
-          
-  if( (get_effect_p() == 1) && (fc_effect.mode_cycle == 1) )
-  {
-    return (_seg->speed );
-  } 
-  WS2812FX_fade_out();
-  extern u8 get_custom_index(void);
-  u8 offset;
-
-  offset = 7;
-
-  if(_seg_rt->counter_mode_step < 5)
-  {
-    WS2812FX_setPixelColor(_seg->stop  - _seg_rt->counter_mode_step -2, _seg->colors[0]);
-    // printf("\n _seg_rt->counter_mode_step=%d",_seg_rt->counter_mode_step);  
-  }
-
-  if(_seg_rt->counter_mode_step < 5)
-  WS2812FX_setPixelColor(_seg->stop / 2 - _seg_rt->counter_mode_step -1, _seg->colors[0]);
-
-  _seg_rt->counter_mode_step = (_seg_rt->counter_mode_step + 1) % (_seg_len + offset);
-  if(_seg_rt->counter_mode_step == 0)
-  {
-    SET_CYCLE;
-    fc_effect.mode_cycle = 1;
-    // printf("\n fc_effect.mode_cycle=%d",fc_effect.mode_cycle);
-  } 
-
-  return (_seg->speed );
-}
-#endif
-
 // 反向移动某一段
 // s起始地址
 // e结束地址
@@ -266,6 +136,11 @@ void fade_out(uint16_t x)
 
 // 100 50 25 12 6 3 2 1 1 0 0 0
 #define MAX_RATE 12
+/**
+ * @brief 单流星
+ *
+ * @return * uint16_t
+ */
 uint16_t WS2812FX_mode_comet_1(void)
 {
     static uint8_t i = 0;
@@ -312,6 +187,11 @@ uint16_t WS2812FX_mode_comet_1(void)
 }
 
 // 两段流星灯，正向，反向
+/**
+ * @brief 从中间开始分成两段，单独的流星灯，支持正向和反向
+ *
+ * @return uint16_t
+ */
 uint16_t WS2812FX_mode_comet_2(void)
 {
     static uint8_t i = 0;
@@ -495,7 +375,7 @@ uint16_t fc_double_meteor(void)
  */
 uint16_t WS2812FX_mode_comet_4(void)
 {
-    u16 speed = _seg->speed * 10; // 由于 WS2812FX_service 是 1ms调用一次，每次加10ms的时基，这里速度值要乘以10 
+    u16 speed = _seg->speed * 10; // 由于 WS2812FX_service 是 1ms调用一次，每次加10ms的时基，这里速度值要乘以10
 
     if ((get_effect_p() == 1) && (fc_effect.mode_cycle == 1)) // 计时中 && 完成一个循环
     {
@@ -547,7 +427,102 @@ uint16_t WS2812FX_mode_comet_4(void)
     }
 
     // return (_seg->speed); // 返回计数器结果
-    return (speed); 
+    return (speed);
+}
+
+/**
+ * @brief 逐点流水 兼容正反方向
+ *
+ * @return uint16_t
+ */
+uint16_t WS2812FX_mode_comet_5(void)
+{
+    u16 speed = _seg->speed * 10; // 由于 WS2812FX_service 是 1ms调用一次，每次加10ms的时基，这里速度值要乘以10
+
+    // 补丁：
+    if (0 == _seg_rt->counter_mode_call)
+    {
+        // 刚进入，清除之前的数据残留
+        Adafruit_NeoPixel_fill(BLACK, _seg->start, _seg_len);
+    }
+
+    if ((get_effect_p() == 1) && (fc_effect.mode_cycle == 1)) // 计时中 && 完成一个循环
+    {
+        return (speed);
+    }
+
+    u8 offset = 1;
+    if (IS_REVERSE)
+    {
+        Adafruit_NeoPixel_fill(BLACK, _seg->start, _seg_len); // 全段填黑色，灭灯
+        if (_seg_rt->counter_mode_step < _seg_len)
+            WS2812FX_setPixelColor(_seg->stop - _seg_rt->counter_mode_step, WHITE);
+    }
+    else
+    {
+        Adafruit_NeoPixel_fill(BLACK, _seg->start, _seg_len); // 全段填黑色，灭灯
+        WS2812FX_setPixelColor(_seg->start + _seg_rt->counter_mode_step, WHITE);
+    }
+    _seg_rt->counter_mode_step++;
+    _seg_rt->counter_mode_step %= _seg_len + offset;
+
+    if (_seg_rt->counter_mode_step == 0)
+    {
+        SET_CYCLE;
+        Adafruit_NeoPixel_fill(BLACK, _seg->start, _seg_len); // 全段填黑色，灭灯
+        fc_effect.mode_cycle = 1;
+        // return fc_effect.period_cnt; // 控制一轮动画之间的时间间隔
+    }
+    return (speed); // 返回计数器结果
+}
+
+/**
+ * @brief 追逐流水
+ *
+ * @return uint16_t
+ */
+uint16_t WS2812FX_mode_comet_6(void)
+{
+    u16 speed = _seg->speed * 10; // 由于 WS2812FX_service 是 1ms调用一次，每次加10ms的时基，这里速度值要乘以10
+    // 补丁：
+    if (0 == _seg_rt->counter_mode_call)
+    {
+        // 刚进入，清除之前的数据残留
+        Adafruit_NeoPixel_fill(BLACK, _seg->start, _seg_len);
+    }
+
+    if ((get_effect_p() == 1) && (fc_effect.mode_cycle == 1)) // 计时中 && 完成一个循环
+    {
+        return (speed);
+    }
+
+    u8 offset = 1;
+    if (IS_REVERSE)
+    {
+        Adafruit_NeoPixel_fill(BLACK, _seg->start, _seg_len); // 全段填黑色，灭灯
+        if (_seg_rt->counter_mode_step < _seg_len)
+            WS2812FX_setPixelColor(_seg->stop - _seg_rt->counter_mode_step, WHITE); // 灯珠填充颜色
+        if (_seg_rt->counter_mode_step < _seg_len - 1)
+            WS2812FX_setPixelColor(_seg->stop - _seg_rt->counter_mode_step - 1, WHITE);
+    }
+    else // 正向
+    {
+        Adafruit_NeoPixel_fill(BLACK, _seg->start, _seg_len); // 全段填黑色，灭灯
+        WS2812FX_setPixelColor(_seg->start + _seg_rt->counter_mode_step, WHITE);
+        WS2812FX_setPixelColor(_seg->start + _seg_rt->counter_mode_step + 1, WHITE);
+    }
+
+    _seg_rt->counter_mode_step++;
+    _seg_rt->counter_mode_step %= _seg_len + offset;
+
+    if (_seg_rt->counter_mode_step == 0)
+    {
+        Adafruit_NeoPixel_fill(BLACK, _seg->start, _seg_len); // 全段填黑色，灭灯
+        SET_CYCLE;
+        fc_effect.mode_cycle = 1;
+        // return fc_effect.period_cnt; // 返回周期值，控制一轮动画之间的时间间隔
+    }
+    return (speed); // 返回速度 （函数执行的定时时间）
 }
 
 /******** 流星  ****/
@@ -566,6 +541,7 @@ void set_mss(uint16_t s)
         music_star_sp = 10;
 }
 
+// 飙升，类似均衡器的效果
 uint16_t music_mode1(void)
 {
     static u8 trg_cnt = 0;
@@ -1179,26 +1155,26 @@ uint16_t music_1(void)
 }
 
 // 开机效果
-uint16_t power_on_effect(void)
-{
-    if (_seg_rt->counter_mode_step)
-    {
-        Adafruit_NeoPixel_fill(BLACK, _seg->start, _seg_len);
-    }
-    else
-    {
-        Adafruit_NeoPixel_fill(GREEN, _seg->start, _seg_len);
-    }
-    _seg_rt->counter_mode_step = !_seg_rt->counter_mode_step;
-    _seg_rt->aux_param++;
-    if (_seg_rt->aux_param > 6)
-    {
-        extern void read_flash_device_status_init(void);
-        read_flash_device_status_init();
-        set_fc_effect();
-    }
-    return (500);
-}
+// uint16_t power_on_effect(void)
+// {
+//     if (_seg_rt->counter_mode_step)
+//     {
+//         Adafruit_NeoPixel_fill(BLACK, _seg->start, _seg_len);
+//     }
+//     else
+//     {
+//         Adafruit_NeoPixel_fill(GREEN, _seg->start, _seg_len);
+//     }
+//     _seg_rt->counter_mode_step = !_seg_rt->counter_mode_step;
+//     _seg_rt->aux_param++;
+//     if (_seg_rt->aux_param > 6)
+//     {
+//         extern void read_flash_device_status_init(void);
+//         read_flash_device_status_init();
+//         set_fc_effect();
+//     }
+//     return (500);
+// }
 
 uint16_t power_off_effect(void)
 {
@@ -2444,31 +2420,31 @@ uint16_t WS2812FX_mode_static(void)
     return _seg->speed;
 }
 
-// 提示效果,白光闪烁
-uint16_t white_tips(void)
-{
-    printf("white_tips\r\n");
-    if (_seg_rt->counter_mode_step)
-    {
-        Adafruit_NeoPixel_fill(GRAY, _seg->start, _seg_len);
-    }
-    else
-    {
-        Adafruit_NeoPixel_fill(0, _seg->start, _seg_len);
-    }
-    _seg_rt->counter_mode_step = !_seg_rt->counter_mode_step;
-    _seg_rt->aux_param++;
-    if (_seg_rt->aux_param > 3)
-    {
-        _seg_rt->aux_param = 0;
+// // 提示效果,白光闪烁
+// uint16_t white_tips(void)
+// {
+//     printf("white_tips\r\n");
+//     if (_seg_rt->counter_mode_step)
+//     {
+//         Adafruit_NeoPixel_fill(GRAY, _seg->start, _seg_len);
+//     }
+//     else
+//     {
+//         Adafruit_NeoPixel_fill(0, _seg->start, _seg_len);
+//     }
+//     _seg_rt->counter_mode_step = !_seg_rt->counter_mode_step;
+//     _seg_rt->aux_param++;
+//     if (_seg_rt->aux_param > 3)
+//     {
+//         _seg_rt->aux_param = 0;
 
-        extern void read_flash_device_status_init(void);
-        read_flash_device_status_init();
-        printf("fc_effect.Now_state = %d", fc_effect.Now_state);
-        set_fc_effect();
-    }
-    return (3000);
-}
+//         extern void read_flash_device_status_init(void);
+//         read_flash_device_status_init();
+//         printf("fc_effect.Now_state = %d", fc_effect.Now_state);
+//         set_fc_effect();
+//     }
+//     return (3000);
+// }
 
 /**
  * @brief 流星灯关机时对应的动画效果，灯光全灭

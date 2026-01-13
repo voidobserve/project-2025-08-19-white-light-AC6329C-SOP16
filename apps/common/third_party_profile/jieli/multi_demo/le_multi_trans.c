@@ -1046,8 +1046,8 @@ static int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_h
                 // 流星模式
                 if(LedCommand[0]==0x2F && LedCommand[1]==0x00)
                 {
-                    extern void set_mereor_mode(u8 m);
-                    set_mereor_mode(LedCommand[2]);
+                    // extern void set_mereor_mode(u8 m);
+                    app_set_mereor_mode(LedCommand[2]);
                     printf("\n mereor_mode=%d",LedCommand[2]);
                     os_taskq_post("msg_task", 1, MSG_USER_SAVE_INFO);
                     Send_buffer[6] = 0x2F;

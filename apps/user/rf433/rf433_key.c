@@ -88,8 +88,8 @@ static u8 rf_433_key_get_value(void)
 
 	if (flag_is_received_rf_433_data)
 	{
-		flag_is_received_rf_433_data = 0;
-
+		flag_is_received_rf_433_data = 0; 
+ 
 		last_rf_433_data = recv_rf_433_data;
 #if RF_433_LEARN_ENABLE
 		recv_rf_433_addr = recv_rf_433_data >> 8; // 存放接收到的遥控器的地址；客户给到的遥控器，后面8位是键值，前面16位是地址
@@ -371,35 +371,23 @@ void rf_433_key_event_handle(void)
 		return; // 该按键事件 没有对应的处理函数，直接返回
 	}
 
-	/*
-		MARK:
-		USER_TO_DO
-		待修改
-	*/
-#if 0
-	if (0 == save_info.flag_is_light_on)
+	if (rf_433_key_event == RF_433_KEY_EVENT_R1C3_CLICK ||
+		rf_433_key_event == RF_433_KEY_EVENT_R1C3_LONG ||
+		rf_433_key_event == RF_433_KEY_EVENT_R1C4_CLICK ||
+		rf_433_key_event == RF_433_KEY_EVENT_R1C4_LONG)
 	{
-		// 如果设备没有启动，只对开关按键做处理
-		if (rf_433_key_event != RF_433_KEY_EVENT_R1C4_CLICK &&
-			rf_433_key_event != RF_433_KEY_EVENT_R1C4_LONG)
-		{
-			return;
-		}
-
-		if (NULL == rf433_key_handle_func_ptr)
-		{
-			// 如果开关按键没有填写对应的处理函数，直接退出
-			return;
-		}
-
+		// 如果是开关按键事件：
 		rf433_key_handle_func_ptr();
-		os_taskq_post("msg_task", 1, MSG_USER_SAVE_INFO);
+	}
+
+	if (get_on_off_state() == DEVICE_OFF)
+	{
+		// 如果没有开机，直接返回
 		return;
 	}
-#endif
 
+	// 如果不是开关按键事件，则执行普通按键事件处理函数：
 	rf433_key_handle_func_ptr();
-
 	os_taskq_post("msg_task", 1, MSG_USER_SAVE_INFO);
 }
 
@@ -407,32 +395,24 @@ void rf_433_key_event_r1c1_click_handle(void)
 {
 	printf("28keys event r1c1\n");
 
-	/*
-		MARK:
-		USER_TO_DO
-		待修改
-	*/
-#if 1
-	// if (fc_effect.Now_state == METEORITE_LAMP_MODE)
-	if (1) // 如果不是在声控模式下，调节速度
+	if (fc_effect.Now_state == ACT_CUSTOM)
 	{
+		// 如果不是在声控模式下，调节速度
 		// 速度加
-		// lighting_animation_speed_add();
-		// 向app反馈流星灯速度
-		// app_feedback_meteor_lights_speed();
 
 		const u8 step = 10;
-		if (fc_effect.speed < 100 - step)
+		if (fc_effect.speed > 0 + step)
 		{
-			fc_effect.speed += 10;
+			fc_effect.speed -= step;
 		}
 		else
 		{
-			fc_effect.speed = 100;
+			fc_effect.speed = 0;
 		}
 
 		printf("fc_effect.speed == %u\n", (u16)fc_effect.speed);
 		set_fc_effect();
+		fc_meteor_speed(); // 向app反馈流星灯速度值
 	}
 	else if (fc_effect.Now_state == IS_light_music)
 	{
@@ -447,29 +427,32 @@ void rf_433_key_event_r1c1_click_handle(void)
 			fc_effect.music.s = 100;
 		}
 
-		fb_sensitive(); // 向app反馈灵敏度
-
-		printf("fc_effect.music.s= %u\n", (u16)fc_effect.music.s);
+		printf("fc_effect.music.s == %u\n", (u16)fc_effect.music.s);
+		feedback_meteor_sensitivity(); // 向app反馈流星灯灵敏度值
 	}
-#endif
 }
 
 void rf_433_key_event_r1c2_click_handle(void)
 {
 	printf("28keys event r1c2\n");
 
-	/*
-		MARK:
-		USER_TO_DO
-		待修改
-	*/
-#if 0
-	if (fc_effect.Now_state == METEORITE_LAMP_MODE)
+	if (fc_effect.Now_state == ACT_CUSTOM)
 	{
+		// 如果不是在声控模式下，调节速度
 		// 速度减
-		lighting_animation_speed_sub();
-		// 向app反馈流星灯速度
-		app_feedback_meteor_lights_speed();
+		const u8 step = 10;
+		if (fc_effect.speed < 100 - step)
+		{
+			fc_effect.speed += step;
+		}
+		else
+		{
+			fc_effect.speed = 100;
+		}
+
+		printf("fc_effect.speed == %u\n", (u16)fc_effect.speed);
+		set_fc_effect();
+		fc_meteor_speed(); // 向app反馈流星灯速度值
 	}
 	else if (fc_effect.Now_state == IS_light_music)
 	{
@@ -484,11 +467,9 @@ void rf_433_key_event_r1c2_click_handle(void)
 			fc_effect.music.s = 0;
 		}
 
-		fb_sensitive(); // 向app反馈灵敏度
-
-		printf("fc_effect.music.s= %u\n", (u16)fc_effect.music.s);
+		printf("fc_effect.music.s == %u\n", (u16)fc_effect.music.s);
+		feedback_meteor_sensitivity(); // 向app反馈流星灯灵敏度值
 	}
-#endif
 }
 
 void rf_433_key_event_r1c3_click_handle(void)
@@ -497,6 +478,7 @@ void rf_433_key_event_r1c3_click_handle(void)
 
 	// 关灯
 	soft_turn_off_lights();
+	feedback_meteor_power_status();
 }
 
 void rf_433_key_event_r1c4_click_handle(void)
@@ -505,6 +487,7 @@ void rf_433_key_event_r1c4_click_handle(void)
 
 	// 开灯
 	soft_turn_on_the_light();
+	feedback_meteor_power_status();
 }
 
 void rf_433_key_event_r2c1_click_handle(void)
@@ -512,7 +495,8 @@ void rf_433_key_event_r2c1_click_handle(void)
 	printf("28keys event r2c1\n");
 
 	// 模式 加
-	// lighting_animation_mode_add();
+	printf("mode add\n");
+	add_meteor_mode();
 }
 
 void rf_433_key_event_r2c2_click_handle(void)
@@ -520,7 +504,8 @@ void rf_433_key_event_r2c2_click_handle(void)
 	printf("28keys event r2c2\n");
 
 	// 模式 减
-	// lighting_animation_mode_sub();
+	printf("mode sub\n");
+	sub_meteor_mode();
 }
 
 void rf_433_key_event_r2c3_click_handle(void)
@@ -528,8 +513,8 @@ void rf_433_key_event_r2c3_click_handle(void)
 	printf("28keys event r2c3\n");
 
 	// 亮度加
-	// lighting_animation_bright_add();
-	// app_feedback_meteor_lights_brightness();
+	printf("bright add\n");
+	bright_plus();
 }
 
 void rf_433_key_event_r2c4_click_handle(void)
@@ -537,8 +522,8 @@ void rf_433_key_event_r2c4_click_handle(void)
 	printf("28keys event r2c4\n");
 
 	// 亮度减
-	// lighting_animation_bright_sub();
-	// app_feedback_meteor_lights_brightness();
+	printf("bright sub\n");
+	bright_sub();
 }
 
 void rf_433_key_event_r3c1_click_handle(void)
@@ -586,7 +571,7 @@ void rf_433_key_event_r4c1_click_handle(void)
 	printf("28keys event r4c1\n");
 
 	// 切换成 模式 1
-	// lighting_animation_mode_setting(1);
+	meteor_lights_set_custom_mode(1);
 }
 
 void rf_433_key_event_r4c2_click_handle(void)
@@ -594,7 +579,7 @@ void rf_433_key_event_r4c2_click_handle(void)
 	printf("28keys event r4c2\n");
 
 	// 切换成 模式 2
-	// lighting_animation_mode_setting(2);
+	meteor_lights_set_custom_mode(2);
 }
 
 void rf_433_key_event_r4c3_click_handle(void)
@@ -602,7 +587,7 @@ void rf_433_key_event_r4c3_click_handle(void)
 	printf("28keys event r4c3\n");
 
 	// 切换成 模式 3
-	// lighting_animation_mode_setting(3);
+	meteor_lights_set_custom_mode(3);
 }
 
 void rf_433_key_event_r4c4_click_handle(void)
@@ -610,7 +595,7 @@ void rf_433_key_event_r4c4_click_handle(void)
 	printf("28keys event r4c4\n");
 
 	// 切换成 模式 4
-	// lighting_animation_mode_setting(4);
+	meteor_lights_set_custom_mode(4);
 }
 
 void rf_433_key_event_r5c1_click_handle(void)
@@ -618,7 +603,7 @@ void rf_433_key_event_r5c1_click_handle(void)
 	printf("28keys event r5c1\n");
 
 	// 模式 5
-	// lighting_animation_mode_setting(5);
+	meteor_lights_set_custom_mode(5);
 }
 
 void rf_433_key_event_r5c2_click_handle(void)
@@ -626,7 +611,7 @@ void rf_433_key_event_r5c2_click_handle(void)
 	printf("28keys event r5c2\n");
 
 	// 模式 6
-	// lighting_animation_mode_setting(6);
+	meteor_lights_set_custom_mode(6);
 }
 
 void rf_433_key_event_r5c3_click_handle(void)
@@ -634,7 +619,7 @@ void rf_433_key_event_r5c3_click_handle(void)
 	printf("28keys event r5c3\n");
 
 	// 模式 7
-	// lighting_animation_mode_setting(7);
+	meteor_lights_set_custom_mode(7);
 }
 
 void rf_433_key_event_r5c4_click_handle(void)
@@ -642,7 +627,7 @@ void rf_433_key_event_r5c4_click_handle(void)
 	printf("28keys event r5c4\n");
 
 	// 模式 8
-	// lighting_animation_mode_setting(8);
+	meteor_lights_set_custom_mode(8);
 }
 
 void rf_433_key_event_r6c1_click_handle(void)
@@ -650,7 +635,7 @@ void rf_433_key_event_r6c1_click_handle(void)
 	printf("28keys event r6c1\n");
 
 	// 模式 9
-	// lighting_animation_mode_setting(9);
+	meteor_lights_set_custom_mode(9);
 }
 
 void rf_433_key_event_r6c2_click_handle(void)
@@ -658,7 +643,7 @@ void rf_433_key_event_r6c2_click_handle(void)
 	printf("28keys event r6c2\n");
 
 	// 模式 10
-	// lighting_animation_mode_setting(10);
+	meteor_lights_set_custom_mode(10);
 }
 
 void rf_433_key_event_r6c3_click_handle(void)
@@ -666,7 +651,7 @@ void rf_433_key_event_r6c3_click_handle(void)
 	printf("28keys event r6c3\n");
 
 	// 模式 11
-	// lighting_animation_mode_setting(11);
+	meteor_lights_set_custom_mode(11);
 }
 
 void rf_433_key_event_r6c4_click_handle(void)
@@ -674,7 +659,7 @@ void rf_433_key_event_r6c4_click_handle(void)
 	printf("28keys event r6c4\n");
 
 	// 模式 12
-	// lighting_animation_mode_setting(12);
+	meteor_lights_set_custom_mode(12);
 }
 
 void rf_433_key_event_r7c1_click_handle(void)
@@ -682,7 +667,7 @@ void rf_433_key_event_r7c1_click_handle(void)
 	printf("28keys event r7c1\n");
 
 	// 模式 13
-	// lighting_animation_mode_setting(13);
+	meteor_lights_set_custom_mode(13);
 }
 
 void rf_433_key_event_r7c2_click_handle(void)
@@ -690,7 +675,7 @@ void rf_433_key_event_r7c2_click_handle(void)
 	printf("28keys event r7c2\n");
 
 	// 模式 14
-	// lighting_animation_mode_setting(14);
+	meteor_lights_set_custom_mode(14);
 }
 
 void rf_433_key_event_r7c3_click_handle(void)
@@ -698,7 +683,7 @@ void rf_433_key_event_r7c3_click_handle(void)
 	printf("28keys event r7c3\n");
 
 	// 模式 15
-	// lighting_animation_mode_setting(15);
+	meteor_lights_set_custom_mode(15);
 }
 
 void rf_433_key_event_r7c4_click_handle(void)
@@ -706,7 +691,7 @@ void rf_433_key_event_r7c4_click_handle(void)
 	printf("28keys event r7c4\n");
 
 	// 模式 16
-	// lighting_animation_mode_setting(16);
+	meteor_lights_set_custom_mode(16);
 }
 
 const rf_433_key_handle_func_t rf_433_key_handle_func_buff[RF_433_KEY_EVENT_MAX] = {

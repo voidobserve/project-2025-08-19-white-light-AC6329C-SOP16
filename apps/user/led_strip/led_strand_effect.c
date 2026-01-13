@@ -1,11 +1,4 @@
-/****************************
-@led_strand_effect.c
-适用：
-产品ID: yxwh27s5
-品类：幻彩户外串灯-蓝牙
-协议：BLE
-负责幻彩灯串效果制作
-*****************************/
+
 #include "system/includes.h"
 #include "led_strand_effect.h"
 #include "WS2812FX.H"
@@ -49,11 +42,19 @@ void fc_data_init(void)
     fc_effect.mode_cycle = 1;
     fc_effect.b = 255;
     fc_effect.music.s = 85;
+
+    fc_effect.control_source = CONTROL_SOURCE_REMOTE; // 默认是遥控器控制
 }
 // WS2812FX_mode_comet
 // WS2812FX_mode_scan
 extern uint16_t WS2812FX_mode_comet_1(void);
 
+/**
+ * @brief 上电时，根据记忆的状态，调用对应模式
+ *
+ * @note 需要注意 fc_effect.control_source 要在调用前就已经配置好
+ *
+ */
 void full_color_init(void)
 {
     WS2812FX_init(fc_effect.led_num, NEO_BGR);
@@ -70,8 +71,30 @@ void full_color_init(void)
     set_fc_effect();
 }
 
+/**
+ * @brief 由遥控器控制的，流星灯切换至自定义的模式，子模式根据传入的索引进行切换
+ *
+ * @param mode_index 自定义的模式的子模式索引值
+ */
+void meteor_lights_set_custom_mode(u8 mode_index)
+{
+    fc_effect.control_source = CONTROL_SOURCE_REMOTE;
+    fc_effect.Now_state = ACT_CUSTOM;
+    fc_effect.custom_index = mode_index;
+    set_fc_effect();
+}
+
 /**************************************************效果调度函数*****************************************************/
 
+/**
+ * @brief Set the fc effect object
+ *
+ * @attention 需要提前确定 fc_effect.Now_state 的值
+ * @attention 声控模式下，需要提前确定 fc_effect.music.m 的值
+ * @attention ACT_CUSTOM 模式下，需要提前确定 fc_effect.custom_index 的值
+ * @attention ACT_CUSTOM 模式下，需要提前确定 fc_effect.control_source 的值
+ *
+ */
 void set_fc_effect(void)
 {
 
@@ -84,6 +107,7 @@ void set_fc_effect(void)
             ls_scene_effect();
             /* code */
             break;
+            // ==========================================================
         case ACT_TY_PAIR:
             printf("\n ACT_TY_PAIR");
 
@@ -91,21 +115,57 @@ void set_fc_effect(void)
             fc_pair_effect();
             /* code */
             break;
+            // ==========================================================
         case ACT_CUSTOM:
             // printf("\n ACT_CUSTOM");
             custom_effect();
             /* code */
             break;
+            // ==========================================================
         case IS_light_music:
-            /* code */
-            break;
+        {
+            WS2812FX_stop();
+            void *music_effect_addr = NULL;
+            switch (fc_effect.music.m)
+            {
+            case 0:
+                music_effect_addr = music_mode1;
+                break;
+            case 1:
+                music_effect_addr = meteor1;
+                break;
+            case 2:
+                music_effect_addr = music_meteor3;
+                break;
+            case 3:
+                music_effect_addr = music_1;
+                break;
+            default:
+                break;
+            }
+
+            WS2812FX_setSegment_colorOptions(
+                0,                     // 第0段
+                0,                     // 起始位置
+                fc_effect.led_num - 1, // 结束位置
+                music_effect_addr,     // 效果
+                WHITE,                 // 颜色，WS2812FX_setColors设置
+                100,                   // 速度
+                NO_OPTIONS             //
+            );
+            WS2812FX_start();
+        }
+        break;
+            // ==========================================================
         case IS_smear_adjust:
             printf("\n IS_smear_adjust");
             fc_smear_adjust();
             break;
+            // ==========================================================
         case IS_STATIC:
             static_mode();
             break;
+            // ==========================================================
         default:
             break;
         }
@@ -142,7 +202,7 @@ void ls_set_colors(uint8_t n, color_t *c)
 
 /***************************************************自定义效果*****************************************************/
 
-extern uint16_t power_on_effect(void);
+// extern uint16_t power_on_effect(void);
 extern uint16_t power_off_effect(void);
 
 // 1~4，正向流水效果
@@ -153,34 +213,21 @@ u8 meteor_mode = 0;
 // FADE_MEDIUM：6颗
 // FADE_FAST：5颗灯
 // FADE_XFAST:3颗灯
-const u8 fade_type[4] =
-    {
-        FADE_XFAST, FADE_FAST, FADE_MEDIUM, FADE_SLOW};
+const u8 fade_type[4] = {
+    FADE_XFAST, FADE_FAST, FADE_MEDIUM, FADE_SLOW
 
-void set_power_off(void)
-{
-    fc_effect.custom_index = 1; // 关机效果
-    fc_set_style_custom();      // 自定义效果
-    set_fc_effect();
-}
+};
 
-void change_meteor_mode(void)
-{
-    fc_effect.custom_index++;
-    if (fc_effect.custom_index > 0x0a)
-    {
-        fc_effect.custom_index = 1;
-    }
-    set_fc_effect();
-}
-
+/**
+ * @brief 遥控器控制的，切换流星灯的模式
+ *
+ */
 void add_meteor_mode(void)
 {
-
-    // if (fc_effect.custom_index < 0x0a)
+    fc_effect.control_source = CONTROL_SOURCE_REMOTE;
+    fc_effect.Now_state = ACT_CUSTOM;
     if (fc_effect.custom_index < 16)
     {
-
         fc_effect.custom_index++;
     }
 
@@ -188,11 +235,16 @@ void add_meteor_mode(void)
     set_fc_effect();
 }
 
+/**
+ * @brief 遥控器控制的，切换流星灯的模式
+ *
+ */
 void sub_meteor_mode(void)
 {
+    fc_effect.control_source = CONTROL_SOURCE_REMOTE;
+    fc_effect.Now_state = ACT_CUSTOM;
     if (fc_effect.custom_index > 1)
     {
-
         fc_effect.custom_index--;
     }
 
@@ -200,53 +252,13 @@ void sub_meteor_mode(void)
     set_fc_effect();
 }
 
-void meteor_len_pul(void)
+// void set_mereor_mode(u8 m)
+void app_set_mereor_mode(u8 m)
 {
-    if (fc_effect.custom_index == 11 || fc_effect.custom_index == 12 || fc_effect.custom_index == 13 || fc_effect.custom_index == 9 || fc_effect.custom_index == 10)
-    {
-        fc_effect.custom_index = 1;
-    }
-
-    if (fc_effect.custom_index > 0 && fc_effect.custom_index < 4)
-    {
-        fc_effect.custom_index++;
-    }
-    else if (fc_effect.custom_index >= 5 && fc_effect.custom_index < 8)
-    {
-        fc_effect.custom_index++;
-    }
-    printf("fc_effect.custom_index = %d", fc_effect.custom_index);
+    fc_effect.control_source = CONTROL_SOURCE_APP;
+    fc_effect.Now_state = ACT_CUSTOM;
+    fc_effect.custom_index = m;
     set_fc_effect();
-}
-
-void meteor_len_sub(void)
-{
-    if (fc_effect.custom_index == 11 || fc_effect.custom_index == 12 || fc_effect.custom_index == 13 || fc_effect.custom_index == 9 || fc_effect.custom_index == 10)
-    {
-        fc_effect.custom_index = 8;
-    }
-
-    if (fc_effect.custom_index > 1 && fc_effect.custom_index < 5)
-    {
-        fc_effect.custom_index--;
-    }
-    else if (fc_effect.custom_index > 5 && fc_effect.custom_index < 9)
-    {
-        fc_effect.custom_index--;
-    }
-
-    printf("fc_effect.custom_index = %d", fc_effect.custom_index);
-
-    set_fc_effect();
-}
-
-void set_mereor_mode(u8 m)
-{
-
-    {
-        fc_effect.custom_index = m;
-        set_fc_effect();
-    }
 }
 void set_mereor_speed(u8 s)
 {
@@ -267,16 +279,19 @@ void set_custom_index(u8 m)
         fc_effect.custom_index = 1;
 }
 
-const u8 size_type[4] =
-    {
-        SIZE_SMALL, SIZE_MEDIUM, SIZE_LARGE, SIZE_XLARGE
-        // 0
+const u8 size_type[4] = {
+    SIZE_SMALL, SIZE_MEDIUM, SIZE_LARGE, SIZE_XLARGE
+    // 0
 };
 
+/**
+ * @brief 模式调度
+ *
+ * @attention 目前app控制的模式索引只有 1 ~ 13
+ *
+ */
 void custom_effect(void)
 {
-    extern uint16_t WS2812FX_mode_comet_2(void);
-    extern uint16_t WS2812FX_mode_comet_3(void);
     fc_effect.period_cnt = 0;
 
     mode_ptr mode_func_ptr = NULL;
@@ -316,36 +331,66 @@ void custom_effect(void)
     }
     else if (fc_effect.custom_index == 11) // 流星发射，声音触发，可以连续发射
     {
-        extern uint16_t meteor1(void);
-        mode_func_ptr = meteor1;
+        if (fc_effect.control_source == CONTROL_SOURCE_APP)
+        {
+            // 流星发射，支持连续触发
+            mode_func_ptr = meteor1;
+        }
+        else // (fc_effect.control_source == CONTROL_SOURCE_REMOTE)
+        {
+            // 遥控器控制的模式
+            mode_func_ptr = WS2812FX_mode_comet_5;
+        }
+
         meteor_effect_options = NO_OPTIONS;
     }
     else if (fc_effect.custom_index == 12) // 流星发射，声音触发，可以连续发射
     {
-        extern uint16_t music_meteor3(void);
-        mode_func_ptr = music_meteor3;
         meteor_effect_options = NO_OPTIONS;
+        if (fc_effect.control_source == CONTROL_SOURCE_APP)
+        {
+            // 流星发射，支持连续触发，相当于反向的 meteor1
+            mode_func_ptr = music_meteor3;
+        }
+        else // (fc_effect.control_source == CONTROL_SOURCE_REMOTE)
+        {
+            // 遥控器控制的模式
+            // 遥控器控制的模式
+            mode_func_ptr = WS2812FX_mode_comet_5;
+            meteor_effect_options = REVERSE;
+        }
     }
     else if (fc_effect.custom_index == 13) // 声控效果集合
     {
-        extern uint16_t music_1(void);
-        mode_func_ptr = music_1;
+        // USER_TO_DO 可能需要移出自定义的模式，放到声控模式下
+        if (fc_effect.control_source == CONTROL_SOURCE_APP)
+        {
+            // 各种流星灯的声控模式的集合
+            mode_func_ptr = music_1;
+        }
+        else // (fc_effect.control_source == CONTROL_SOURCE_REMOTE)
+        {
+            // 遥控器控制的模式
+            mode_func_ptr = WS2812FX_mode_comet_6;
+        }
+
         meteor_effect_options = NO_OPTIONS;
     }
     else if (14 == fc_effect.custom_index)
     {
-        mode_func_ptr = fc_double_meteor;
-        meteor_effect_options = NO_OPTIONS;
+        mode_func_ptr = WS2812FX_mode_comet_6;
+        meteor_effect_options = REVERSE;
     }
     else if (15 == fc_effect.custom_index)
     {
         mode_func_ptr = fc_double_meteor;
-        meteor_effect_options = REVERSE;
+        meteor_effect_options = NO_OPTIONS;
     }
     else if (16 == fc_effect.custom_index)
     {
-        mode_func_ptr = WS2812FX_mode_comet_4;
-        meteor_effect_options = NO_OPTIONS;
+
+        mode_func_ptr = fc_double_meteor;
+        meteor_effect_options = REVERSE;
     }
 
     WS2812FX_stop();
@@ -361,13 +406,13 @@ void custom_effect(void)
 }
 
 /***************************************************软件关机*****************************************************/
-extern u8 music_trigger;
+// extern u8 music_trigger;
 void soft_turn_off_lights(void) // 软关灯处理
 {
 
     // WS2812FX_stop();
     fc_effect.on_off_flag = DEVICE_OFF;
-    music_trigger = 0;
+    // music_trigger = 0;
 
     fc_effect.Now_state = NOW_STATUS_CLOSE; // 让 set_fc_effect() 执行对应的动画，灯光一直熄灭
     set_fc_effect();
@@ -380,6 +425,7 @@ void soft_turn_off_lights(void) // 软关灯处理
 void soft_turn_on_the_light(void) // 软开灯处理
 {
     fc_effect.on_off_flag = DEVICE_ON;
+
     fc_effect.Now_state = ACT_CUSTOM;
     os_taskq_post("msg_task", 1, MSG_USER_SAVE_INFO);
     set_fc_effect();
@@ -907,7 +953,6 @@ void meteor_p_sub(void)
 // sub:减数，ms
 void meteor_period_sub(void)
 {
-
     if (fc_effect.period_cnt > 1)
     {
         fc_effect.period_cnt -= 1;
@@ -1000,16 +1045,6 @@ void bright_sub(void)
     set_fc_effect();
 }
 
-void meteor_reset(void)
-{
-    fc_effect.b = 255;
-    WS2812FX_setBrightness(fc_effect.b);
-    fc_effect.meteor_period = 10;
-    fc_effect.custom_index = 7;
-    fc_effect.speed = 20;
-    set_fc_effect();
-}
-
 /*---------------------------------------------  向app反馈信息 ---------------*/
 extern void zd_fb_2_app(u8 *p, u8 len);
 void fc_meteor_p(void)
@@ -1045,11 +1080,21 @@ void feedback_meteor_sensitivity(void)
     zd_fb_2_app(send_buffer, 3);
 }
 
-/*--------------------------------------API-----------------------------------*/
-// 触发提示效果，白光闪烁
-void run_white_tips(void)
+// 向app反馈流星灯的开关状态
+void feedback_meteor_power_status(void)
 {
-    extern uint16_t white_tips(void);
-    WS2812FX_setSegment_colorOptions(0, 0, fc_effect.led_num - 1, &white_tips, 0, 3000, 0);
-    WS2812FX_start();
+    u8 send_buffer[3];
+    send_buffer[0] = 0x2F;
+    send_buffer[1] = 0x02;
+    send_buffer[2] = fc_effect.on_off_flag;
+    zd_fb_2_app(send_buffer, 3);
 }
+
+/*--------------------------------------API-----------------------------------*/
+// // 触发提示效果，白光闪烁
+// void run_white_tips(void)
+// {
+//     extern uint16_t white_tips(void);
+//     WS2812FX_setSegment_colorOptions(0, 0, fc_effect.led_num - 1, &white_tips, 0, 3000, 0);
+//     WS2812FX_start();
+// }

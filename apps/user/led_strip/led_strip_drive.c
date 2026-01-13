@@ -138,21 +138,27 @@ void check_mic_sound(void)
 // 1:触发
 u8 get_sound_result(void)
 {
-    if(sound.valid==1)
-    {
-        if(sound.v > sound.c_v)
-        {
-            if( (sound.v - sound.c_v) * 100 / sound.v > sound.sensitive)
-            {
-                printf("\n sound.v =%d",sound.v);
-                printf("\n sound.c_v =%d",sound.c_v);
-                extern void WS2812FX_trigger();
-                WS2812FX_trigger();
-                return 1;
-            }
-        }
-    }
 
-    return 0;
+
+    // if(sound.valid==1)
+    // {
+    //     if(sound.v > sound.c_v)
+    //     {
+    //         if( (sound.v - sound.c_v) * 100 / sound.v > sound.sensitive)
+    //         {
+    //             printf("\n sound.v =%d",sound.v);
+    //             printf("\n sound.c_v =%d",sound.c_v);
+    //             extern void WS2812FX_trigger();
+    //             WS2812FX_trigger();
+    //             return 1;
+    //         }
+    //     }
+    // }
+
+    extern volatile u8 music_trigger;
+    u8 ret = music_trigger;
+    music_trigger = 0;
+
+    return ret;
 
 }

@@ -12,7 +12,7 @@ typedef enum
     IS_STATIC,            // 静态模式
     IS_light_music = 27,  // 音乐律动
     IS_light_scene = 56,  // 炫彩情景
-    IS_smear_adjust = 59, // 涂抹功能
+    IS_smear_adjust = 59, // 涂抹功能 
 
     NOW_STATUS_CLOSE, // 关机状态
 
@@ -79,6 +79,14 @@ typedef struct
     unsigned char s; // 灵敏度
 
 } music_t;
+
+
+ typedef enum
+ {
+    CONTROL_SOURCE_APP,
+    CONTROL_SOURCE_REMOTE,
+ }control_source_t ;
+
 /*----------------------------幻彩灯串效果大结构体----------------------------------*/
 typedef struct
 {
@@ -95,7 +103,9 @@ typedef struct
     dream_scene_t dream_scene;   // 幻彩情景
     countdown_t countdown;       // 倒计时
 
-    u8 custom_index; // 实际用，仅用于掉电保存
+    control_source_t control_source;
+
+    u8 custom_index; // 模式索引值(实际用，仅用于掉电保存)
     u8 sensitive;    // 实际用，仅用于掉电保存
 
     music_t music; // 音乐
@@ -105,8 +115,11 @@ typedef struct
 
 extern fc_effect_t fc_effect;
 
+void app_set_mereor_mode(u8 m);
+
 void effect_smear_adjust_updata(smear_tool_e tool, hsv_t *colour, unsigned short *led_place);
 
+void meteor_lights_set_custom_mode(u8 mode_index);
 void set_fc_effect(void);
 
 void full_color_init(void);
@@ -118,5 +131,6 @@ void sensitive_add(void);
 void sensitive_sub(void);
 
 void feedback_meteor_sensitivity(void);
+void feedback_meteor_power_status(void);
 
 #endif

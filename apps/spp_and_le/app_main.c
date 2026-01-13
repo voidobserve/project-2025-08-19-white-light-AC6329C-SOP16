@@ -235,7 +235,7 @@ void rgb_func_isr(void)
 *****************************************************************************************/
 #define USER_IR_ENABLE 0
 ___interrupt
-    AT_VOLATILE_RAM_CODE void user_timer_isr(void) // 50us
+    AT_VOLATILE_RAM_CODE void user_timer_isr(void) //  
 {
     static u8 timer_cnt;
     TIMER_CON |= BIT(14);
@@ -442,126 +442,7 @@ void led_pwm_init(void)
     pwm_p_data.complementary_en = 0;                // 两个引脚的波形, 0: 同步,  1: 互补，互补波形的占空比体现在H引脚上
     mcpwm_init(&pwm_p_data);
 }
-
-/****************************************************************************************
-**名称:软关灯处理
-**功能:
-**说明:
-**备注:
-**日期:
-*****************************************************************************************/
-// void soft_turn_off_lights(void)
-// {
-//     u8 buf[9];
-
-//     if(led_state.OpenorCloseflag == OPEN_STATE) //在开灯的状态下才能关灯
-//     {
-//         set_ir_timer(IR_TIMER_0);
-//         save_led_state = led_state;   //保存当前状态
-
-//         led_state.R_flag = 0;
-//         led_state.G_flag = 0;
-//         led_state.B_flag = 0;
-//         led_state.W_flag = 0;
-//         led_state.ledlight = 0;
-//         led_state.running_task = NO_TASK;
-//         led_state.static_state_flag = NO_LED;
-//         led_state.dynamic_state_flag = NO_LED;
-//         led_state.OpenorCloseflag = CLOSE_STATE;
-
-//         memcpy(buf,Ble_Addr, 6);    //发送开关机状态，与APP同步
-//         buf[6] = 0x01;
-//         buf[7] = 0x01;
-//         buf[8] = 0x00;
-//         app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, buf,9, ATT_OP_AUTO_READ_CCC);
-
-// //        display_led();
-//         Set_Duty(0,0,0);
-
-// //        rgb_func_isr_en = 0;    //关闭可控硅触发功能
-//         LED_OFF;
-
-//         printf("--------Close Light--------");
-//     }
-// }
-
-/****************************************************************************************
-**名称:软开灯处理
-**功能:
-**说明:
-**备注:
-**日期:
-*****************************************************************************************/
-// void soft_turn_on_the_light(void)   //软开灯处理
-// {
-//     u8 buf[9];
-
-//     if(led_state.OpenorCloseflag == CLOSE_STATE) //在关灯的状态下才能开灯
-//     {
-
-//         led_state = save_led_state;                  //读取关机前的状态
-// //        led_state.ledlight = led_state.ledlight_temp;
-//         led_state.OpenorCloseflag = OPEN_STATE;
-
-//         LED_ON;     //打开灯光
-
-//         if(led_state.running_task == DYNAMIC_TASK)
-//         {
-//             os_sem_post(&LedActionSem); //启动动态任务
-//         }
-//         else
-//         {
-//             led_state.running_task = STATIC_TASK;
-//             os_sem_post(&LedStaticSem); //启动静态任务
-//         }
-
-// /*        if(led_state.running_task == DYNAMIC_TASK)
-//         {
-//             os_sem_post(&LedActionSem); //启动动态任务
-//         }
-//         else if(led_state.running_task == STATIC_TASK)
-//         {
-//             os_sem_post(&LedStaticSem); //启动静态任务
-//         }
-//         else if(led_state.running_task == PHASE_SEQUENCE)   //调节相序
-//         {
-//             os_sem_post(&LedStaticSem);
-//         }
-//         else if(led_state.running_task == MUSIC_LED)    //IOS音乐律动任务
-//         {
-//             os_sem_post(&LedStaticSem);
-//         }
-//         else if(led_state.running_task == MIC_LED)      //IOS麦克风任务
-//         {
-//             os_sem_post(&LedStaticSem); //启动静态任务
-//         }
-
-//         else if(led_state.running_task == ANDROID_LED)      //安卓音乐及麦克风任务
-//         {
-//             os_sem_post(&LedStaticSem); //启动静态任务
-//         }
-// */
-//         memcpy(buf,Ble_Addr, 6);    //发送开关机状态，与APP同步
-//         buf[6] = 0x01;
-//         buf[7] = 0x01;
-//         buf[8] = 0x01;
-//         app_send_user_data(ATT_CHARACTERISTIC_fff1_01_VALUE_HANDLE, buf,9, ATT_OP_AUTO_READ_CCC);
-
-//         printf("--------Open Light--------");
-//         printf("led_state.running_task %d\n",led_state.running_task);
-//     }
-// }
-
-/*
-void app_var_init(void)
-{
-    app_var.play_poweron_tone = 1;
-
-    app_var.auto_off_time =  TCFG_AUTO_SHUT_DOWN_TIME;
-    app_var.warning_tone_v = 340;
-    app_var.poweroff_tone_v = 330;
-}
-*/
+ 
 __attribute__((weak)) // 如果有同名的外部函数，则调用外部函数，没有就调用这个函数，声明下面的函数是弱函数
 u8 get_charge_online_flag(void)
 {
@@ -690,108 +571,7 @@ __attribute__((used)) int *__errno()
 {
     static int err;
     return &err;
-}
-/*
-///自定义事件推送的线程
-
-#define Q_USER_DEAL   0xAABBCC ///自定义队列类型
-#define Q_USER_DATA_SIZE  10///理论Queue受任务声明struct task_info.qsize限制,但不宜过大,建议<=6
-
-void user_deal_send_ver(void)
-{
-    //os_taskq_post("user_deal", 1,KEY_USER_DEAL_POST);
-    os_taskq_post_msg("user_deal", 1, KEY_USER_DEAL_POST_MSG);
-    //os_taskq_post_event("user_deal",1, KEY_USER_DEAL_POST_EVENT);
-}
-
-void user_deal_rand_set(u32 rand)
-{
-    os_taskq_post("user_deal", 2, KEY_USER_DEAL_POST_2, rand);
-}
-
-void user_deal_send_array(int *msg, int argc)
-{
-    if (argc > Q_USER_DATA_SIZE) {
-        return;
-    }
-    os_taskq_post_type("user_deal", Q_USER_DEAL, argc, msg);
-}
-void user_deal_send_msg(void)
-{
-    os_taskq_post_event("user_deal", 1, KEY_USER_DEAL_POST_EVENT);
-}
-
-void user_deal_send_test(void)///模拟测试函数,可按键触发调用，自行看打印
-{
-    user_deal_send_ver();
-    user_deal_rand_set(0x11223344);
-    static u32 data[Q_USER_DATA_SIZE] = {0x11223344, 0x55667788, 0x11223344, 0x55667788, 0x11223344,
-                                         0xff223344, 0x556677ee, 0x11223344, 0x556677dd, 0x112233ff,
-                                        };
-    user_deal_send_array(data, sizeof(data) / sizeof(int));
-}
-
-static void user_deal_task_handle(void *p)
-{
-    int msg[Q_USER_DATA_SIZE + 1] = {0, 0, 0, 0, 0, 0, 0, 0, 00, 0};
-    int res = 0;
-    while (1) {
-        res = os_task_pend("taskq", msg, ARRAY_SIZE(msg));  //阻塞方式等待消息队例信息
-        if (res != OS_TASKQ) {
-            continue;
-        }
-        r_printf("user_deal_task_handle:0x%x", msg[0]);
-        put_buf(msg, (Q_USER_DATA_SIZE + 1) * 4);
-        if (msg[0] == Q_MSG) {
-            printf("use os_taskq_post_msg");
-            switch (msg[1]) {
-            case KEY_USER_DEAL_POST_MSG:
-                printf("KEY_USER_DEAL_POST_MSG");
-                break;
-            default:
-                break;
-            }
-        } else if (msg[0] == Q_EVENT) {
-            printf("use os_taskq_post_event");
-            switch (msg[1]) {
-            case KEY_USER_DEAL_POST_EVENT:
-                printf("KEY_USER_DEAL_POST_EVENT");
-                break;
-            default:
-                break;
-            }
-        } else if (msg[0] == Q_CALLBACK) {
-        } else if (msg[0] == Q_USER) {
-            printf("use os_taskq_post");
-            switch (msg[1]) {
-            case KEY_USER_DEAL_POST:
-                printf("KEY_USER_DEAL_POST");
-                break;
-            case KEY_USER_DEAL_POST_2:
-                printf("KEY_USER_DEAL_POST_2:0x%x", msg[2]);
-                break;
-            default:
-                break;
-            }
-        } else if (msg[0] == Q_USER_DEAL) {
-            printf("use os_taskq_post_type");
-            printf("0x%x 0x%x 0x%x 0x%x 0x%x", msg[1], msg[2], msg[3], msg[4], msg[5]);
-            printf("0x%x 0x%x 0x%x 0x%x 0x%x", msg[6], msg[7], msg[8], msg[9], msg[10]);
-        }
-        puts("");
-    }
-}
-
-void user_deal_init(void)
-{
-    task_create(user_deal_task_handle, NULL, "user_deal");
-}
-
-void user_deal_exit(void)
-{
-    task_kill("user_deal");
-}
-*/
+}  
 /****************************************************************************************
 **名称:设置LED的占空比
 **功能:
@@ -1668,19 +1448,19 @@ extern void check_mic_sound(void);
 
 #include "led_strand_effect.h"
 extern u16 check_mic_adc(void);
-u8 music_trigger = 0;
+volatile u8 music_trigger = 0;
 // u32 adc,adc_av;
-#define SAMPLE_N 20
-u8 adc_v_n, adc_avrg_n, adc_total_n;
-u32 adc_sum = 0, adc_sum_n = 0;
-extern uint8_t met_trg;
-extern uint8_t trg_en;
-extern void set_music_oc_trg(u8 p);
-u8 i, j;
-u32 adc, adc_av, adc_all;
-u16 adc_v[SAMPLE_N]; // 记录20个ADC值
-u32 adc_avrg[10];    // 记录5个平均值
-u32 adc_total[15];   // __attribute__((aligned(4)));
+// #define SAMPLE_N 20
+// u8 adc_v_n, adc_avrg_n, adc_total_n;
+// u32 adc_sum = 0, adc_sum_n = 0;
+// extern uint8_t met_trg;
+// extern uint8_t trg_en;
+
+// u8 i, j;
+// u32 adc, adc_av, adc_all;
+// u16 adc_v[SAMPLE_N]; // 记录20个ADC值
+// u32 adc_avrg[10];    // 记录5个平均值
+// u32 adc_total[15];   // __attribute__((aligned(4)));
 
 // 声控
 void sound_handle(void)
@@ -1766,11 +1546,14 @@ void sound_handle(void)
         u32 adc_sum_avrg = adc_sum / adc_sum_n;
         if (adc * fc_effect.music.s / 100 > adc_sum_avrg)
         {
-            if (fc_effect.on_off_flag == DEVICE_ON && // 设备开启
-                fc_effect.Now_state == ACT_CUSTOM &&
-                (fc_effect.custom_index == 11 || /* 处于声控模式下 */
-                 fc_effect.custom_index == 12 ||
-                 fc_effect.custom_index == 13))
+            // if (fc_effect.on_off_flag == DEVICE_ON && // 设备开启
+            //     fc_effect.Now_state == ACT_CUSTOM &&
+            //     (fc_effect.custom_index == 11 || /* 处于声控模式下 */
+            //      fc_effect.custom_index == 12 ||
+            //      fc_effect.custom_index == 13))
+
+            if (fc_effect.on_off_flag == DEVICE_ON && 
+                fc_effect.Now_state == IS_light_music)
             {
                 music_trigger = 1;
                 WS2812FX_trigger(); // 让 WS2812FX_service() 扫描到，立即更新动画，否则看起来声控的灵敏度会差一些
